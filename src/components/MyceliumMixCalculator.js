@@ -3,6 +3,7 @@ import MyceliumDataService from '../services/MyceliumDataService';
 import UserDataService from '../services/UserDataService';
 import RecommendationService from '../services/RecommendationService';
 import LoggingService from '../services/LoggingService';
+import ContentService from '../services/ContentService';
 import Header from './Header';
 import ResultsPanel from './ResultsPanel';
 import RecommendationsPanel from './RecommendationsPanel';
@@ -12,6 +13,9 @@ import MushroomFactsPanel from './MushroomFactsPanel';
 import SubstrateSupplierLinks from './SubstrateSupplierLinks';
 
 const MyceliumMixCalculator = () => {
+    // Get content from ContentService
+    const content = ContentService.getComponentContent('calculator');
+    
     // State to track UI updates
     const [, setUpdateTrigger] = useState(0);
     // State to track if form is complete
@@ -163,20 +167,20 @@ const MyceliumMixCalculator = () => {
             if (success) {
                 LoggingService.info('User settings saved successfully');
                 LoggingService.sendMetric('settings_save_success', 1);
-                alert('Settings saved successfully!');
+                alert(content.alerts.saveSuccess);
             } else {
                 LoggingService.warning('Failed to save user settings');
                 LoggingService.sendMetric('settings_save_failure', 1);
-                alert('Failed to save settings');
+                alert(content.alerts.saveFailure);
             }
         } catch (error) {
             LoggingService.logError(error, 'Error saving user settings');
-            alert('An error occurred while saving settings');
+            alert(content.alerts.saveError);
         }
     };
     
     const handleResetData = () => {
-        if (window.confirm('Are you sure you want to reset to default values?')) {
+        if (window.confirm(content.alerts.resetConfirm)) {
             try {
                 UserDataService.resetToDefaults();
                 RecommendationService.resetRequestLimits(); // Reset API request limits
@@ -203,13 +207,9 @@ const MyceliumMixCalculator = () => {
     return (
         <div className="card custom-grid-2">
             <div>
-                <Header 
-                    title="SpawnSmart" 
-                    description="Your intelligent calculator for perfect mushroom cultivation - optimize spawn-to-substrate ratios for maximum yields, faster colonization, and professional results." 
-                />
-
+                <Header />
                 <div className="mt-6">
-                    <label>Experience Level</label>
+                    <label>{content.formLabels.experienceLevel}</label>
                     <select 
                         className="input mt-1 w-full" 
                         value={userData.experienceLevel} 
@@ -223,7 +223,7 @@ const MyceliumMixCalculator = () => {
                 </div>
 
                 <div className="mt-6">
-                    <label>Spawn Amount (quarts)</label>
+                    <label>{content.formLabels.spawnAmount}</label>
                     <input 
                         type="number" 
                         className="input mt-1 w-full" 
@@ -234,7 +234,7 @@ const MyceliumMixCalculator = () => {
                 </div>
 
                 <div className="mt-6">
-                    <label>Substrate Ratio (1:{userData.substrateRatio})</label>
+                    <label>{content.formLabels.substrateRatio} (1:{userData.substrateRatio})</label>
                     <input 
                         type="range" 
                         className="slider mt-1 w-full" 
@@ -247,7 +247,7 @@ const MyceliumMixCalculator = () => {
                 </div>
 
                 <div className="mt-6">
-                    <label>Substrate Type</label>
+                    <label>{content.formLabels.substrateType}</label>
                     <select 
                         className="input mt-1 w-full" 
                         value={userData.substrateType} 
@@ -260,34 +260,29 @@ const MyceliumMixCalculator = () => {
                     </select>
                 </div>
 
-                <div className="mt-6 mb-4">
-                    <label>Container Size (quarts)</label>
-                    <select 
+                <div className="mt-6">
+                    <label>{content.formLabels.containerSize}</label>
+                    <input 
+                        type="number" 
                         className="input mt-1 w-full" 
                         value={userData.containerSize} 
-                        onChange={handleContainerSizeChange}
+                        onChange={handleContainerSizeChange} 
                         onBlur={handleInputBlur}
-                    >
-                        {MyceliumDataService.containerSizes.map(container => (
-                            <option key={container.size} value={container.size}>
-                                {container.label} - {container.description}
-                            </option>
-                        ))}
-                    </select>
+                    />
                 </div>
-                
-                <div className="mt-6 mb-6 flex gap-2">
+
+                <div className="mt-8 flex space-x-4">
                     <button 
-                        className="btn btn-primary w-1/2" 
+                        className="btn btn-primary flex-1" 
                         onClick={handleSaveData}
                     >
-                        Save Settings
+                        {content.buttons.save}
                     </button>
                     <button 
-                        className="btn btn-secondary w-1/2" 
+                        className="btn btn-secondary flex-1" 
                         onClick={handleResetData}
                     >
-                        Reset to Defaults
+                        {content.buttons.reset}
                     </button>
                 </div>
             </div>

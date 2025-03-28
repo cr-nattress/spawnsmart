@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import OpenAIService from '../services/OpenAIService';
 import LoggingService from '../services/LoggingService';
+import ContentService from '../services/ContentService';
 
 /**
  * MushroomFactsPanel component for displaying interesting facts about psilocybin mushrooms
@@ -11,6 +12,67 @@ const MushroomFactsPanel = () => {
   const [fact, setFact] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Get content from ContentService
+  const content = ContentService.getComponentContent('mushroomFacts');
+
+  /**
+   * Fetch an interesting fact about psilocybin mushrooms from OpenAI
+   */
+  const fetchInterestingFact = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      LoggingService.info('Fetching new mushroom fact');
+      const startTime = Date.now();
+      
+      // Check if OpenAI API key is available
+      if (OpenAIService.apiKey) {
+        // Send the prompt to OpenAI
+        const response = await OpenAIService.sendMessage(content.prompt, {
+          saveToHistory: false,
+          systemPrompt: content.systemPrompt
+        });
+        
+        // Set the fact from the response
+        setFact(response.response.trim());
+        
+        const endTime = Date.now();
+        const processingTime = endTime - startTime;
+        
+        LoggingService.info('Mushroom fact fetched successfully', {
+          processingTime,
+          factLength: response.response.length
+        });
+        
+        // Track fact generation as a metric
+        LoggingService.sendMetric('mushroom_fact_generation_success', 1, {
+          processingTime
+        });
+      } else {
+        // If no API key is available, use a static fact
+        const staticFact = ContentService.getRandomStaticFact();
+        setFact(staticFact);
+        
+        LoggingService.info('Using static mushroom fact (no API key)');
+      }
+    } catch (error) {
+      LoggingService.logError(error, 'Error fetching mushroom fact');
+      setError(content.errorText);
+      
+      // Use a static fact as fallback
+      const staticFact = ContentService.getRandomStaticFact();
+      setFact(staticFact);
+      
+      // Track fact generation failure as a metric
+      LoggingService.sendMetric('mushroom_fact_generation_failure', 1, {
+        errorType: error.name || 'unknown'
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [content]);
 
   // Fetch an interesting fact on component mount
   useEffect(() => {
@@ -23,106 +85,38 @@ const MushroomFactsPanel = () => {
     return () => {
       LoggingService.debug('MushroomFactsPanel unmounted');
     };
-  }, []);
+  }, [fetchInterestingFact]);
 
   /**
-   * Fetch an interesting fact about psilocybin mushrooms from OpenAI
+   * Handle refresh button click
    */
-  const fetchInterestingFact = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      LoggingService.info('Fetching new mushroom fact');
-      const startTime = Date.now();
-      
-      // Create a prompt for OpenAI
-      const prompt = `Share one fascinating scientific fact about psilocybin mushrooms that most people don't know. 
-      Focus on their biology, history, or ecological role - not their psychoactive effects. 
-      Keep it concise (1-2 sentences) and educational.`;
-      
-      // Create a system prompt
-      const systemPrompt = `You are a mycology expert sharing educational information about mushrooms. 
-      Provide scientifically accurate, interesting facts about psilocybin mushrooms focusing on their biology, 
-      ecological role, or scientific history. Avoid discussing recreational use, cultivation techniques, 
-      or psychoactive effects. Keep your response concise, educational, and suitable for a general audience.`;
-      
-      // Send the prompt to OpenAI
-      const response = await OpenAIService.sendMessage(prompt, {
-        saveToHistory: false,
-        systemPrompt: systemPrompt
-      });
-      
-      const endTime = Date.now();
-      const processingTime = endTime - startTime;
-      
-      setFact(response.response);
-      
-      LoggingService.info('Successfully fetched mushroom fact', {
-        factLength: response.response.length,
-        processingTime
-      });
-      
-      // Track fact generation time as a metric
-      LoggingService.sendMetric('mushroom_fact_generation_time', processingTime);
-      LoggingService.sendMetric('mushroom_fact_generation_success', 1);
-    } catch (err) {
-      LoggingService.logError(err, 'Error fetching mushroom fact', {
-        component: 'MushroomFactsPanel'
-      });
-      
-      // Track fact generation failure as a metric
-      LoggingService.sendMetric('mushroom_fact_generation_failure', 1, {
-        errorType: err.name || 'unknown'
-      });
-      
-      setError('Unable to load interesting fact. Please check your API key.');
-      setFact('Did you know? Mushrooms are more closely related to humans than to plants!');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Get a new fact
-   */
-  const handleNewFact = () => {
-    LoggingService.info('User requested new mushroom fact');
+  const handleRefresh = () => {
     fetchInterestingFact();
-    
-    // Track new fact button click as a metric
-    LoggingService.sendMetric('new_fact_button_click', 1);
+    LoggingService.info('User requested new mushroom fact');
+    LoggingService.sendMetric('mushroom_fact_refresh_click', 1);
   };
 
   return (
-    <div className="card mt-6 p-4 bg-note-bg">
+    <div className="card mt-4">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-xl font-semibold">Mushroom Fact</h2>
+        <h2 className="text-xl font-semibold">{content.title}</h2>
         <button 
-          onClick={handleNewFact} 
-          className="btn btn-secondary btn-sm"
+          onClick={handleRefresh} 
+          className="btn btn-secondary text-sm"
           disabled={loading}
         >
-          {loading ? 'Loading...' : 'New Fact'}
+          {content.refreshButton}
         </button>
       </div>
       
-      {error ? (
-        <div className="p-3 bg-red-100 text-red-700 rounded-lg">
-          {error}
-        </div>
-      ) : (
-        <div className="italic">
-          {loading ? (
-            <div className="animate-pulse">Loading interesting fact...</div>
-          ) : (
-            fact
-          )}
-        </div>
-      )}
-      
-      <div className="text-xs text-secondary-text mt-4">
-        Facts provided by AI. For educational purposes only.
+      <div className="p-2 bg-gray-50 rounded-lg min-h-[80px] flex items-center justify-center">
+        {loading ? (
+          <p className="text-gray-500">{content.loadingText}</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <p className="text-gray-700">{fact}</p>
+        )}
       </div>
     </div>
   );
