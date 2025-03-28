@@ -215,6 +215,28 @@ class RecommendationService {
 
     try {
       const startTime = Date.now();
+      const requestId = `rec_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      
+      // Log the request details before sending to OpenAI
+      LoggingService.info('Preparing OpenAI recommendation request', {
+        requestId,
+        experienceLevel,
+        substrateType,
+        spawnAmount: userData.spawnAmount,
+        substrateRatio: userData.substrateRatio,
+        containerSize: userData.containerSize,
+        promptLength: prompt.length,
+        systemPromptLength: systemPrompt.length,
+        trainingCategories: trainingModel.categories.length,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Log a truncated version of the prompt for debugging
+      const truncatedPrompt = prompt.length > 300 ? `${prompt.substring(0, 300)}...` : prompt;
+      LoggingService.debug('OpenAI recommendation prompt', {
+        requestId,
+        prompt: truncatedPrompt
+      });
       
       // Send the prompt to OpenAI
       const response = await OpenAIService.sendMessage(prompt, {
@@ -225,31 +247,63 @@ class RecommendationService {
       const endTime = Date.now();
       const processingTime = endTime - startTime;
       
+      // Log the response details
+      LoggingService.info('Received OpenAI recommendation response', {
+        requestId,
+        processingTime,
+        responseLength: response.response.length,
+        tokenUsage: response.usage,
+        timestamp: new Date().toISOString()
+      });
+      
       // Track the processing time as a metric
       LoggingService.sendMetric('recommendation_processing_time', processingTime, {
-        experienceLevel: userData.experienceLevel
+        experienceLevel: userData.experienceLevel,
+        requestId
       });
 
       // Parse the response as JSON
       let recommendations;
       try {
         recommendations = JSON.parse(response.response);
+        
+        // Log successful parsing
+        LoggingService.info('Successfully parsed OpenAI response as JSON', {
+          requestId,
+          recommendationCount: recommendations.length
+        });
       } catch (parseError) {
         LoggingService.warning('Failed to parse OpenAI response as JSON, extracting recommendations from text', {
-          responseLength: response.response.length
+          requestId,
+          responseLength: response.response.length,
+          errorMessage: parseError.message
         });
+        
         // If parsing fails, try to extract recommendations from the text
         recommendations = this.extractRecommendationsFromText(response.response);
+        
+        LoggingService.info('Extracted recommendations from text', {
+          requestId,
+          extractedCount: recommendations.length
+        });
       }
 
       // Ensure we have an array of recommendations
       if (!Array.isArray(recommendations)) {
         LoggingService.warning('OpenAI response is not an array, using static recommendations', {
+          requestId,
           responseType: typeof recommendations
         });
         return this.getStaticRecommendations(userData);
       }
 
+      // Log the final recommendations
+      LoggingService.info('Finalized AI recommendations', {
+        requestId,
+        count: recommendations.length,
+        processingTime
+      });
+      
       return {
         personalizedRecommendations: recommendations,
         source: 'ai',
@@ -258,7 +312,10 @@ class RecommendationService {
     } catch (error) {
       LoggingService.logError(error, 'Error getting AI recommendations', {
         experienceLevel,
-        substrateType
+        substrateType,
+        errorType: error.name,
+        errorMessage: error.message,
+        timestamp: new Date().toISOString()
       });
       throw error; // Re-throw to be handled by the calling function
     }

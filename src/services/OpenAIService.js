@@ -20,6 +20,12 @@ class OpenAIService {
     
     // Load training data from localStorage on initialization
     this.loadTrainingDataFromLocalStorage();
+    
+    LoggingService.info('OpenAIService initialized', {
+      model: this.model,
+      apiKeyPresent: !!this.apiKey,
+      trainingDataCount: this.trainingData.length
+    });
   }
 
   /**
@@ -37,6 +43,7 @@ class OpenAIService {
    */
   setModel(model) {
     this.model = model;
+    LoggingService.info('OpenAI model updated', { model });
   }
 
   /**
@@ -79,10 +86,8 @@ class OpenAIService {
         throw error;
       }
 
-      LoggingService.info('Sending message to OpenAI', {
-        messageLength: message.length,
-        systemPromptLength: systemPrompt.length
-      });
+      // Start timing the request
+      const startTime = Date.now();
       
       // Prepare messages array with system prompt and conversation history
       const messages = [
@@ -90,6 +95,25 @@ class OpenAIService {
         ...this.conversationHistory,
         { role: 'user', content: message }
       ];
+      
+      // Log detailed information about the request being sent
+      LoggingService.info('Sending request to OpenAI API', {
+        messageLength: message.length,
+        systemPromptLength: systemPrompt.length,
+        model: this.model,
+        historyLength: this.conversationHistory.length,
+        timestamp: new Date().toISOString(),
+        requestId: `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+        saveToHistory,
+        saveToTrainingData
+      });
+      
+      // Log the actual content being sent (truncated for large messages)
+      const truncatedMessage = message.length > 500 ? `${message.substring(0, 500)}...` : message;
+      LoggingService.debug('OpenAI request content', {
+        userMessage: truncatedMessage,
+        systemPrompt: systemPrompt.length > 500 ? `${systemPrompt.substring(0, 500)}...` : systemPrompt
+      });
 
       // Make the API request
       const response = await axios.post(
@@ -103,12 +127,16 @@ class OpenAIService {
         { headers: this.getHeaders() }
       );
 
+      // Calculate request duration
+      const requestDuration = Date.now() - startTime;
+
       // Check if the response is ok
       if (!response.data) {
         const error = new Error('Error connecting to OpenAI API');
         LoggingService.logError(error, 'OpenAI API error response', {
           status: response.status,
-          errorMessage: response.statusText
+          errorMessage: response.statusText,
+          requestDuration
         });
         
         throw error;
@@ -117,14 +145,34 @@ class OpenAIService {
       // Extract the assistant's response
       const assistantResponse = response.data.choices[0].message.content;
       
-      LoggingService.info('Received response from OpenAI', {
+      // Log detailed information about the response received
+      LoggingService.info('Received response from OpenAI API', {
         responseLength: assistantResponse.length,
-        tokenUsage: response.data.usage
+        tokenUsage: response.data.usage,
+        promptTokens: response.data.usage.prompt_tokens,
+        completionTokens: response.data.usage.completion_tokens,
+        totalTokens: response.data.usage.total_tokens,
+        requestDuration,
+        model: this.model,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Log the actual content received (truncated for large responses)
+      const truncatedResponse = assistantResponse.length > 500 ? 
+        `${assistantResponse.substring(0, 500)}...` : assistantResponse;
+      LoggingService.debug('OpenAI response content', {
+        assistantResponse: truncatedResponse
       });
       
       // Track API call metrics
       LoggingService.sendMetric('openai_api_call_success', 1, {
-        tokenUsage: response.data.usage
+        tokenUsage: response.data.usage,
+        requestDuration
+      });
+      
+      // Track request duration as a separate metric
+      LoggingService.sendMetric('openai_request_duration', requestDuration, {
+        model: this.model
       });
 
       // Save to conversation history if requested
@@ -133,6 +181,9 @@ class OpenAIService {
           { role: 'user', content: message },
           { role: 'assistant', content: assistantResponse }
         );
+        LoggingService.debug('Added exchange to conversation history', {
+          historyLength: this.conversationHistory.length
+        });
       }
 
       // Save to training data if requested
@@ -143,24 +194,32 @@ class OpenAIService {
           timestamp: new Date().toISOString(),
           model: this.model
         });
+        LoggingService.debug('Added exchange to training data', {
+          trainingDataLength: this.trainingData.length
+        });
       }
 
       return {
         response: assistantResponse,
-        fullResponse: response.data
+        fullResponse: response.data,
+        usage: response.data.usage,
+        requestDuration
       };
     } catch (error) {
       // If the error wasn't already logged (from the response.ok check)
       if (!error.status) {
         LoggingService.logError(error, 'Error in OpenAI API call', {
-          messageLength: message.length
+          messageLength: message.length,
+          model: this.model,
+          timestamp: new Date().toISOString()
         });
       }
       
       // Track API call failure
       LoggingService.sendMetric('openai_api_call_failure', 1, {
         errorType: error.name || 'unknown',
-        errorStatus: error.status || 'unknown'
+        errorStatus: error.status || 'unknown',
+        model: this.model
       });
       
       throw error;
