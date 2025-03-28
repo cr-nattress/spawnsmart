@@ -346,7 +346,12 @@ const processSporeData = (rawData) => {
       description: description,
       price: spore['Price'] || 'Price not available',
       url: spore['URL'] || '#',
-      imageUrl: `https://via.placeholder.com/150?text=${encodeURIComponent(spore['Subtype'] || 'Mushroom')}`
+      imageUrl: `https://via.placeholder.com/150?text=${encodeURIComponent(spore['Subtype'] || 'Mushroom')}`,
+      strength: spore['Strength'] || '',
+      moodEffects: spore['Mood Effects'] || '',
+      medicinalBenefits: spore['Medicinal Benefits'] || '',
+      culinaryUses: spore['Culinary Uses'] || '',
+      appearance: spore['Size & Appearance'] || ''
     };
   });
 };

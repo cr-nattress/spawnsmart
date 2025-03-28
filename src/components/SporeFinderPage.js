@@ -77,6 +77,47 @@ const SporeFinderPage = () => {
                 </div>
               </div>
               <p className="text-gray-600 mb-4">{spore.description}</p>
+              
+              {/* Appearance Information */}
+              {spore.appearance && (
+                <div className="mb-4">
+                  <strong className="text-sm text-gray-700">Appearance:</strong>
+                  <span className="text-sm ml-2">{spore.appearance}</span>
+                </div>
+              )}
+              
+              {/* Strength Information - Only show for psychoactive varieties */}
+              {(spore.type === 'cubensis' || spore.type === 'cyanescens') && spore.strength && (
+                <div className="mb-4">
+                  <strong className="text-sm text-gray-700">Strength:</strong>
+                  <span className="text-sm ml-2">{spore.strength}</span>
+                </div>
+              )}
+              
+              {/* Mood Effects - Only show for psychoactive varieties */}
+              {(spore.type === 'cubensis' || spore.type === 'cyanescens') && spore.moodEffects && (
+                <div className="mb-4">
+                  <strong className="text-sm text-gray-700">Effects:</strong>
+                  <span className="text-sm ml-2">{spore.moodEffects}</span>
+                </div>
+              )}
+              
+              {/* Medicinal Benefits - Only show for medicinal varieties */}
+              {spore.type === 'medicinal' && spore.medicinalBenefits && (
+                <div className="mb-4">
+                  <strong className="text-sm text-gray-700">Medicinal Benefits:</strong>
+                  <span className="text-sm ml-2">{spore.medicinalBenefits}</span>
+                </div>
+              )}
+              
+              {/* Culinary Uses - Only show for gourmet varieties */}
+              {spore.type === 'gourmet' && spore.culinaryUses && (
+                <div className="mb-4">
+                  <strong className="text-sm text-gray-700">Culinary Uses:</strong>
+                  <span className="text-sm ml-2">{spore.culinaryUses}</span>
+                </div>
+              )}
+              
               <div className="mb-4">
                 <strong className="text-sm text-gray-700">Colonization Time:</strong>
                 <span className="text-sm ml-2">{spore.colonizationTime}</span>
