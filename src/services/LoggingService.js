@@ -6,7 +6,9 @@ import axios from 'axios';
 
 class LoggingService {
   constructor() {
-    this.apiUrl = process.env.REACT_APP_BETTERSTACK_API_URL || 'https://logs.betterstack.com/api/v1/logs';
+    // Ensure the API URL has the correct protocol
+    const apiUrlFromEnv = process.env.REACT_APP_BETTERSTACK_API_URL || 'logs.betterstack.com/api/v1/logs';
+    this.apiUrl = apiUrlFromEnv.startsWith('http') ? apiUrlFromEnv : `https://${apiUrlFromEnv}`;
     this.apiToken = process.env.REACT_APP_BETTERSTACK_API_TOKEN || '';
     this.sourceId = 'spawnsmart';
     this.enabled = process.env.NODE_ENV === 'production' || process.env.REACT_APP_ENABLE_LOGGING === 'true';
@@ -22,6 +24,10 @@ class LoggingService {
       WARNING: 'warning',
       ERROR: 'error'
     };
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`LoggingService initialized with API URL: ${this.apiUrl}`);
+    }
   }
 
   /**
@@ -172,6 +178,10 @@ class LoggingService {
     try {
       const payload = logsToSend.length === 1 ? logsToSend[0] : logsToSend;
       
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Sending logs to: ${this.apiUrl}`);
+      }
+      
       const response = await axios.post(this.apiUrl, payload, {
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +193,10 @@ class LoggingService {
         console.warn(`Unexpected response from logging service: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error sending logs to BetterStack:', error);
+      console.error('Error sending logs to BetterStack:', error.message);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error details:', error);
+      }
       
       // If sending fails, add the logs back to the queue
       this.logQueue = [...logsToSend, ...this.logQueue];
