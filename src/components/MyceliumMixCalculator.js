@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import MyceliumDataService from '../services/MyceliumDataService';
 import UserDataService from '../services/UserDataService';
 import RecommendationService from '../services/RecommendationService';
+import LoggingService from '../services/LoggingService';
 import Header from './Header';
 import ResultsPanel from './ResultsPanel';
 import RecommendationsPanel from './RecommendationsPanel';
 /* Temporarily hidden AI Cultivation Advisor */
 /* import AIAdvicePanel from './AIAdvicePanel'; */
 import MushroomFactsPanel from './MushroomFactsPanel';
+import SubstrateSupplierLinks from './SubstrateSupplierLinks';
 
 const MyceliumMixCalculator = () => {
     // State to track UI updates
@@ -35,10 +37,18 @@ const MyceliumMixCalculator = () => {
             // Load recommendations from OpenAI
             const loadRecommendations = async () => {
                 try {
+                    LoggingService.info('Loading recommendations after form completion', {
+                        experienceLevel: data.experienceLevel,
+                        substrateType: data.substrateType
+                    });
+                    
                     await RecommendationService.getPersonalizedRecommendations(true);
                     setRecommendationsLoaded(true);
+                    
+                    LoggingService.info('Recommendations loaded successfully');
                 } catch (error) {
-                    console.error('Error loading recommendations:', error);
+                    LoggingService.logError(error, 'Error loading recommendations after form completion');
+                    setRecommendationsLoaded(false);
                 }
             };
             
@@ -48,12 +58,29 @@ const MyceliumMixCalculator = () => {
     
     // Load data from UserDataService on component mount
     useEffect(() => {
-        // Try to load saved data from localStorage
-        UserDataService.loadFromLocalStorage();
-        // Force a re-render to display the loaded data
-        setUpdateTrigger(prev => prev + 1);
-        // Check if form is already complete from saved data
-        checkFormCompletion(UserDataService.getUserData());
+        LoggingService.info('MyceliumMixCalculator mounted');
+        
+        try {
+            // Try to load saved data from localStorage
+            UserDataService.loadFromLocalStorage();
+            // Force a re-render to display the loaded data
+            setUpdateTrigger(prev => prev + 1);
+            // Check if form is already complete from saved data
+            checkFormCompletion(UserDataService.getUserData());
+            
+            LoggingService.info('User data loaded from localStorage', {
+                experienceLevel: UserDataService.getUserData().experienceLevel
+            });
+        } catch (error) {
+            LoggingService.logError(error, 'Error loading user data from localStorage');
+        }
+        
+        // Track component view as a metric
+        LoggingService.sendMetric('calculator_view', 1);
+        
+        return () => {
+            LoggingService.debug('MyceliumMixCalculator unmounted');
+        };
     }, [checkFormCompletion]);
     
     // Get current values from UserDataService
@@ -63,51 +90,106 @@ const MyceliumMixCalculator = () => {
     
     // Handler functions for form inputs
     const handleExperienceLevelChange = (e) => {
-        UserDataService.updateUserData('experienceLevel', e.target.value);
-        setUpdateTrigger(prev => prev + 1);
-        checkFormCompletion({...userData, experienceLevel: e.target.value});
+        try {
+            const newValue = e.target.value;
+            UserDataService.updateUserData('experienceLevel', newValue);
+            setUpdateTrigger(prev => prev + 1);
+            checkFormCompletion({...userData, experienceLevel: newValue});
+            
+            LoggingService.info('User changed experience level', { newValue });
+            LoggingService.sendMetric('experience_level_change', 1, { level: newValue });
+        } catch (error) {
+            LoggingService.logError(error, 'Error updating experience level');
+        }
     };
     
     const handleSpawnAmountChange = (e) => {
-        const value = parseFloat(e.target.value) || 0;
-        UserDataService.updateUserData('spawnAmount', value);
-        setUpdateTrigger(prev => prev + 1);
-        checkFormCompletion({...userData, spawnAmount: value});
+        try {
+            const value = parseFloat(e.target.value) || 0;
+            UserDataService.updateUserData('spawnAmount', value);
+            setUpdateTrigger(prev => prev + 1);
+            checkFormCompletion({...userData, spawnAmount: value});
+            
+            LoggingService.debug('User changed spawn amount', { value });
+        } catch (error) {
+            LoggingService.logError(error, 'Error updating spawn amount');
+        }
     };
     
     const handleSubstrateRatioChange = (e) => {
-        const value = parseInt(e.target.value);
-        UserDataService.updateUserData('substrateRatio', value);
-        setUpdateTrigger(prev => prev + 1);
-        checkFormCompletion({...userData, substrateRatio: value});
+        try {
+            const value = parseInt(e.target.value);
+            UserDataService.updateUserData('substrateRatio', value);
+            setUpdateTrigger(prev => prev + 1);
+            checkFormCompletion({...userData, substrateRatio: value});
+            
+            LoggingService.debug('User changed substrate ratio', { value });
+        } catch (error) {
+            LoggingService.logError(error, 'Error updating substrate ratio');
+        }
     };
     
     const handleSubstrateTypeChange = (e) => {
-        UserDataService.updateUserData('substrateType', e.target.value);
-        setUpdateTrigger(prev => prev + 1);
-        checkFormCompletion({...userData, substrateType: e.target.value});
+        try {
+            const newValue = e.target.value;
+            UserDataService.updateUserData('substrateType', newValue);
+            setUpdateTrigger(prev => prev + 1);
+            checkFormCompletion({...userData, substrateType: newValue});
+            
+            LoggingService.info('User changed substrate type', { newValue });
+            LoggingService.sendMetric('substrate_type_change', 1, { type: newValue });
+        } catch (error) {
+            LoggingService.logError(error, 'Error updating substrate type');
+        }
     };
     
     const handleContainerSizeChange = (e) => {
-        const value = parseFloat(e.target.value);
-        UserDataService.updateUserData('containerSize', value);
-        setUpdateTrigger(prev => prev + 1);
-        checkFormCompletion({...userData, containerSize: value});
+        try {
+            const value = parseFloat(e.target.value);
+            UserDataService.updateUserData('containerSize', value);
+            setUpdateTrigger(prev => prev + 1);
+            checkFormCompletion({...userData, containerSize: value});
+            
+            LoggingService.debug('User changed container size', { value });
+        } catch (error) {
+            LoggingService.logError(error, 'Error updating container size');
+        }
     };
     
     const handleSaveData = () => {
-        const success = UserDataService.saveToLocalStorage();
-        alert(success ? 'Settings saved successfully!' : 'Failed to save settings');
+        try {
+            const success = UserDataService.saveToLocalStorage();
+            
+            if (success) {
+                LoggingService.info('User settings saved successfully');
+                LoggingService.sendMetric('settings_save_success', 1);
+                alert('Settings saved successfully!');
+            } else {
+                LoggingService.warning('Failed to save user settings');
+                LoggingService.sendMetric('settings_save_failure', 1);
+                alert('Failed to save settings');
+            }
+        } catch (error) {
+            LoggingService.logError(error, 'Error saving user settings');
+            alert('An error occurred while saving settings');
+        }
     };
     
     const handleResetData = () => {
         if (window.confirm('Are you sure you want to reset to default values?')) {
-            UserDataService.resetToDefaults();
-            RecommendationService.resetRequestLimits(); // Reset API request limits
-            setRecommendationsLoaded(false);
-            setIsFormComplete(false);
-            setHasLostFocus(false); // Reset the focus state as well
-            setUpdateTrigger(prev => prev + 1);
+            try {
+                UserDataService.resetToDefaults();
+                RecommendationService.resetRequestLimits(); // Reset API request limits
+                setRecommendationsLoaded(false);
+                setIsFormComplete(false);
+                setHasLostFocus(false); // Reset the focus state as well
+                setUpdateTrigger(prev => prev + 1);
+                
+                LoggingService.info('User reset data to defaults');
+                LoggingService.sendMetric('settings_reset', 1);
+            } catch (error) {
+                LoggingService.logError(error, 'Error resetting data to defaults');
+            }
         }
     };
 
@@ -115,6 +197,7 @@ const MyceliumMixCalculator = () => {
     const handleInputBlur = () => {
         checkFormCompletion(userData);
         setHasLostFocus(true);
+        LoggingService.debug('User lost focus on input field, checking form completion');
     };
 
     return (
@@ -212,15 +295,20 @@ const MyceliumMixCalculator = () => {
             <div>
                 <ResultsPanel results={results} ingredients={results.ingredients} />
                 
-                {isFormComplete && recommendationsLoaded && hasLostFocus ? (
-                    <RecommendationsPanel 
-                        recommendations={recommendations} 
-                        cultivationTips={MyceliumDataService.cultivationTips.slice(0, 6)} 
-                        userData={userData}
-                    />
-                ) : (
-                    <MushroomFactsPanel />
-                )}
+                <div className="flex flex-col flex-grow">
+                    {isFormComplete && recommendationsLoaded && hasLostFocus ? (
+                        <RecommendationsPanel 
+                            recommendations={recommendations} 
+                            cultivationTips={MyceliumDataService.cultivationTips.slice(0, 6)} 
+                            userData={userData}
+                        />
+                    ) : (
+                        <MushroomFactsPanel />
+                    )}
+                    
+                    {/* Substrate supplier links section */}
+                    <SubstrateSupplierLinks />
+                </div>
                 
                 {/* Temporarily hidden AI Cultivation Advisor */}
                 {/* <AIAdvicePanel userData={userData} /> */}

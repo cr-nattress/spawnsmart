@@ -6,6 +6,7 @@
  */
 
 import axios from 'axios';
+import LoggingService from './LoggingService';
 
 class OpenAIService {
   constructor() {
@@ -27,6 +28,7 @@ class OpenAIService {
    */
   setApiKey(apiKey) {
     this.apiKey = apiKey;
+    LoggingService.info('API key set in OpenAIService');
   }
 
   /**
@@ -43,7 +45,9 @@ class OpenAIService {
    */
   getHeaders() {
     if (!this.apiKey) {
-      throw new Error('API key not set. Please call setApiKey() first.');
+      const error = new Error('API key not set. Please call setApiKey() first.');
+      LoggingService.warning('Attempted to get headers without API key');
+      throw error;
     }
     
     return {
@@ -70,9 +74,16 @@ class OpenAIService {
 
     try {
       if (!this.apiKey) {
-        throw new Error('API key not set. Please call setApiKey() first.');
+        const error = new Error('API key not set. Please call setApiKey() first.');
+        LoggingService.warning('Attempted to send message without API key');
+        throw error;
       }
 
+      LoggingService.info('Sending message to OpenAI', {
+        messageLength: message.length,
+        systemPromptLength: systemPrompt.length
+      });
+      
       // Prepare messages array with system prompt and conversation history
       const messages = [
         { role: 'system', content: systemPrompt },
@@ -92,8 +103,29 @@ class OpenAIService {
         { headers: this.getHeaders() }
       );
 
+      // Check if the response is ok
+      if (!response.data) {
+        const error = new Error('Error connecting to OpenAI API');
+        LoggingService.logError(error, 'OpenAI API error response', {
+          status: response.status,
+          errorMessage: response.statusText
+        });
+        
+        throw error;
+      }
+
       // Extract the assistant's response
       const assistantResponse = response.data.choices[0].message.content;
+      
+      LoggingService.info('Received response from OpenAI', {
+        responseLength: assistantResponse.length,
+        tokenUsage: response.data.usage
+      });
+      
+      // Track API call metrics
+      LoggingService.sendMetric('openai_api_call_success', 1, {
+        tokenUsage: response.data.usage
+      });
 
       // Save to conversation history if requested
       if (saveToHistory) {
@@ -118,7 +150,19 @@ class OpenAIService {
         fullResponse: response.data
       };
     } catch (error) {
-      console.error('Error calling OpenAI API:', error.response?.data || error.message);
+      // If the error wasn't already logged (from the response.ok check)
+      if (!error.status) {
+        LoggingService.logError(error, 'Error in OpenAI API call', {
+          messageLength: message.length
+        });
+      }
+      
+      // Track API call failure
+      LoggingService.sendMetric('openai_api_call_failure', 1, {
+        errorType: error.name || 'unknown',
+        errorStatus: error.status || 'unknown'
+      });
+      
       throw error;
     }
   }
@@ -164,7 +208,7 @@ class OpenAIService {
       }
       return false;
     } catch (error) {
-      console.error('Error importing training data:', error);
+      LoggingService.logError(error, 'Error importing training data');
       return false;
     }
   }
@@ -176,9 +220,10 @@ class OpenAIService {
   saveTrainingDataToLocalStorage() {
     try {
       localStorage.setItem('openaiTrainingData', this.exportTrainingData());
+      LoggingService.debug('Saved training data to localStorage');
       return true;
     } catch (error) {
-      console.error('Error saving training data to localStorage:', error);
+      LoggingService.logError(error, 'Error saving training data to localStorage');
       return false;
     }
   }
@@ -195,7 +240,7 @@ class OpenAIService {
       }
       return false;
     } catch (error) {
-      console.error('Error loading training data from localStorage:', error);
+      LoggingService.logError(error, 'Error loading training data from localStorage');
       return false;
     }
   }
@@ -205,6 +250,7 @@ class OpenAIService {
    */
   clearConversationHistory() {
     this.conversationHistory = [];
+    LoggingService.info('Cleared conversation history');
   }
 
   /**

@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import OpenAIService from '../services/OpenAIService';
+import LoggingService from '../services/LoggingService';
 
 /**
- * AIAdvicePanel component for displaying AI-generated cultivation advice
+ * AIAdvicePanel component for generating AI-powered cultivation advice
  * 
- * @param {Object} props Component props
- * @param {Object} props.userData The user's cultivation data
+ * @param {Object} props - Component props
+ * @param {Object} props.userData - User data from the calculator
  * @returns {JSX.Element} The rendered AIAdvicePanel component
  */
 const AIAdvicePanel = ({ userData }) => {
   const [advice, setAdvice] = useState('');
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [apiKey, setApiKey] = useState(localStorage.getItem('openai_api_key') || '');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(!localStorage.getItem('openai_api_key'));
   const [hasEnvApiKey, setHasEnvApiKey] = useState(false);
 
   // Check if API key is available in environment variables
@@ -22,32 +23,115 @@ const AIAdvicePanel = ({ userData }) => {
     setHasEnvApiKey(!!envApiKey && envApiKey !== 'your_openai_api_key_here');
   }, []);
 
+  // Set the API key in the OpenAIService when it changes
+  useEffect(() => {
+    LoggingService.info('AIAdvicePanel mounted');
+    
+    if (apiKey) {
+      OpenAIService.setApiKey(apiKey);
+      LoggingService.debug('API key set in OpenAIService');
+    }
+    
+    // Track panel view as a metric
+    LoggingService.sendMetric('ai_advice_panel_view', 1);
+    
+    return () => {
+      LoggingService.debug('AIAdvicePanel unmounted');
+    };
+  }, [apiKey]);
+
   /**
-   * Generate AI advice using the OpenAI service
+   * Save the API key to localStorage
+   */
+  const handleSaveApiKey = () => {
+    try {
+      if (apiKey) {
+        localStorage.setItem('openai_api_key', apiKey);
+        OpenAIService.setApiKey(apiKey);
+        setShowApiKeyInput(false);
+        LoggingService.info('User saved API key');
+        LoggingService.sendMetric('api_key_save', 1);
+      }
+    } catch (error) {
+      LoggingService.logError(error, 'Error saving API key');
+      setError('Failed to save API key');
+    }
+  };
+
+  /**
+   * Generate cultivation advice based on user data
    */
   const generateAdvice = async () => {
-    // Reset states
-    setError('');
+    if (!hasEnvApiKey && !apiKey) {
+      setShowApiKeyInput(true);
+      LoggingService.warning('Attempted to generate advice without API key');
+      return;
+    }
+
     setLoading(true);
+    setError(null);
     
     try {
-      // Set the API key if provided via UI and not in env
-      if (!hasEnvApiKey && apiKey) {
-        OpenAIService.setApiKey(apiKey);
-      }
+      LoggingService.info('Generating cultivation advice', {
+        experienceLevel: userData.experienceLevel,
+        substrateType: userData.substrateType
+      });
       
-      // Generate advice
-      const generatedAdvice = await OpenAIService.generateCultivationAdvice(userData);
-      setAdvice(generatedAdvice);
+      const startTime = Date.now();
       
-      // Save this exchange to training data
-      OpenAIService.saveTrainingDataToLocalStorage();
+      // Create a prompt for OpenAI
+      const prompt = `
+        I'm growing mushrooms with the following setup:
+        - Experience level: ${userData.experienceLevel}
+        - Spawn amount: ${userData.spawnAmount} quarts
+        - Substrate ratio: 1:${userData.substrateRatio}
+        - Substrate type: ${userData.substrateType}
+        - Container size: ${userData.containerSize} quarts
+        
+        Based on this information, provide me with detailed cultivation advice. 
+        Include tips on optimal conditions, potential challenges I might face, and how to maximize yield.
+      `;
+      
+      // Create a system prompt
+      const systemPrompt = `
+        You are an expert mushroom cultivation advisor. Provide detailed, helpful advice 
+        based on the user's specific setup. Focus on practical tips, optimal conditions, 
+        and how to maximize success. Your advice should be tailored to their experience level 
+        and specific cultivation parameters. Keep your response under 300 words and focus on 
+        actionable advice.
+      `;
+      
+      // Send the prompt to OpenAI
+      const response = await OpenAIService.sendMessage(prompt, {
+        saveToHistory: false,
+        systemPrompt: systemPrompt
+      });
+      
+      const endTime = Date.now();
+      const processingTime = endTime - startTime;
+      
+      setAdvice(response.response);
+      
+      LoggingService.info('Successfully generated cultivation advice', {
+        responseLength: response.response.length,
+        processingTime
+      });
+      
+      // Track advice generation time as a metric
+      LoggingService.sendMetric('advice_generation_time', processingTime);
+      LoggingService.sendMetric('advice_generation_success', 1);
     } catch (error) {
-      console.error('Error generating advice:', error);
-      setError(
-        error.response?.data?.error?.message || 
-        'Error connecting to OpenAI. Please check your API key and try again.'
-      );
+      LoggingService.logError(error, 'Error generating cultivation advice', {
+        experienceLevel: userData.experienceLevel,
+        substrateType: userData.substrateType
+      });
+      
+      // Track advice generation failure as a metric
+      LoggingService.sendMetric('advice_generation_failure', 1, {
+        errorType: error.name || 'unknown'
+      });
+      
+      setError('Failed to generate advice. Please check your API key.');
     } finally {
       setLoading(false);
     }
@@ -89,6 +173,13 @@ const AIAdvicePanel = ({ userData }) => {
               >
                 Hide
               </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleSaveApiKey}
+                disabled={!apiKey}
+              >
+                Save
+              </button>
             </div>
           )}
         </>
@@ -113,6 +204,15 @@ const AIAdvicePanel = ({ userData }) => {
           <h3 className="text-lg font-semibold mb-2">Personalized Advice</h3>
           <div className="p-4 bg-note-bg rounded-lg whitespace-pre-wrap">
             {advice}
+          </div>
+          <div className="mt-4 flex justify-end">
+            <button 
+              className="btn btn-secondary btn-sm" 
+              onClick={generateAdvice}
+              disabled={loading}
+            >
+              Regenerate Advice
+            </button>
           </div>
         </div>
       )}

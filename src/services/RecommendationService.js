@@ -8,6 +8,7 @@
 import OpenAIService from './OpenAIService';
 import UserDataService from './UserDataService';
 import MyceliumDataService from './MyceliumDataService';
+import LoggingService from './LoggingService';
 import trainingModel from '../data/recommendation-training-model.json';
 
 class RecommendationService {
@@ -17,6 +18,10 @@ class RecommendationService {
     this.lastRequestTime = 0;
     this.requestCount = 0;
     this.maxRequests = 3;
+    
+    LoggingService.info('RecommendationService initialized', {
+      maxRequests: this.maxRequests
+    });
   }
 
   /**
@@ -26,6 +31,8 @@ class RecommendationService {
   resetRequestLimits() {
     this.requestCount = 0;
     this.lastRequestTime = 0;
+    
+    LoggingService.info('RecommendationService request limits reset');
   }
 
   /**
@@ -39,13 +46,19 @@ class RecommendationService {
 
     // Check if we've hit the maximum number of requests
     if (this.requestCount >= this.maxRequests) {
-      console.log('Maximum request count reached');
+      LoggingService.warning('Maximum request count reached', {
+        requestCount: this.requestCount,
+        maxRequests: this.maxRequests
+      });
       return false;
     }
 
     // Check if enough time has passed since the last request
     if (this.lastRequestTime > 0 && timeSinceLastRequest < minimumInterval) {
-      console.log('Rate limit: Too soon since last request');
+      LoggingService.warning('Rate limit: Too soon since last request', {
+        timeSinceLastRequest,
+        minimumInterval
+      });
       return false;
     }
 
@@ -78,6 +91,10 @@ class RecommendationService {
     
     // Return cached recommendations if user data hasn't changed and we're not forcing refresh
     if (!forceRefresh && this.cachedRecommendations && currentHash === this.lastUserDataHash) {
+      LoggingService.debug('Using cached recommendations', {
+        experienceLevel: userData.experienceLevel,
+        source: this.cachedRecommendations.source
+      });
       return this.cachedRecommendations;
     }
 
@@ -86,7 +103,10 @@ class RecommendationService {
       if (OpenAIService.apiKey) {
         // Check if we can make a new request based on rate limiting
         if (!this.canMakeNewRequest()) {
-          console.log('Request limits reached, using static recommendations');
+          LoggingService.info('Request limits reached, using static recommendations', {
+            requestCount: this.requestCount,
+            maxRequests: this.maxRequests
+          });
           const staticRecommendations = this.getStaticRecommendations(userData);
           return {
             ...staticRecommendations,
@@ -98,21 +118,49 @@ class RecommendationService {
         // Update request tracking
         this.lastRequestTime = Date.now();
         this.requestCount++;
-        console.log(`Making OpenAI request #${this.requestCount} of ${this.maxRequests}`);
+        LoggingService.info(`Making OpenAI request for recommendations`, {
+          requestNumber: this.requestCount,
+          maxRequests: this.maxRequests,
+          experienceLevel: userData.experienceLevel
+        });
 
         const recommendations = await this.getAIRecommendations(userData);
         this.cachedRecommendations = recommendations;
         this.lastUserDataHash = currentHash;
+        
+        LoggingService.info('Successfully generated AI recommendations', {
+          experienceLevel: userData.experienceLevel,
+          recommendationCount: recommendations.personalizedRecommendations.length
+        });
+        
+        // Track recommendation generation time as a metric
+        LoggingService.sendMetric('recommendation_generation_success', 1, {
+          experienceLevel: userData.experienceLevel,
+          source: 'ai'
+        });
+        
         return recommendations;
       } else {
         // Fall back to static recommendations if no API key is available
+        LoggingService.warning('No API key available, using static recommendations');
         const recommendations = this.getStaticRecommendations(userData);
         this.cachedRecommendations = recommendations;
         this.lastUserDataHash = currentHash;
         return recommendations;
       }
     } catch (error) {
-      console.error('Error generating recommendations:', error);
+      LoggingService.logError(error, 'Error generating recommendations', {
+        experienceLevel: userData.experienceLevel,
+        substrateType: userData.substrateType,
+        forceRefresh
+      });
+      
+      // Track recommendation generation failures as a metric
+      LoggingService.sendMetric('recommendation_generation_failure', 1, {
+        experienceLevel: userData.experienceLevel,
+        errorType: error.name || 'unknown'
+      });
+      
       // Fall back to static recommendations on error
       return this.getStaticRecommendations(userData);
     }
@@ -151,53 +199,106 @@ class RecommendationService {
       Training data categories: ${trainingModel.categories.map(cat => cat.category_name).join(', ')}
     `;
 
-    // Create a system prompt that includes the training data
+    // Create a system prompt using the training model data
     const systemPrompt = `
-      You are a mushroom cultivation expert assistant. Use the following training data to provide 
-      specific, tailored recommendations based on the user's cultivation setup.
+      You are an expert mushroom cultivation advisor. Your task is to provide personalized 
+      recommendations based on the user's cultivation setup and the following training data:
       
-      Training data: ${JSON.stringify(trainingModel)}
+      ${trainingModel.categories.map(category => {
+        return `Category: ${category.category_name}\n${category.recommendations.join('\n')}`;
+      }).join('\n\n')}
       
-      Provide your response as a JSON array of 5 string recommendations. Each recommendation should 
-      be specific to the user's setup and drawn from the most relevant tips in the training data.
+      Analyze the user's setup and provide the most relevant recommendations from the training data.
+      Your response should be a valid JSON array of strings, with each string being a specific recommendation.
+      Focus on providing actionable, specific advice that is directly relevant to the user's setup.
     `;
 
-    // Send the prompt to OpenAI
-    const response = await OpenAIService.sendMessage(prompt, {
-      saveToHistory: false,
-      saveToTrainingData: true,
-      systemPrompt: systemPrompt
-    });
-
     try {
+      const startTime = Date.now();
+      
+      // Send the prompt to OpenAI
+      const response = await OpenAIService.sendMessage(prompt, {
+        saveToHistory: false,
+        systemPrompt
+      });
+      
+      const endTime = Date.now();
+      const processingTime = endTime - startTime;
+      
+      // Track the processing time as a metric
+      LoggingService.sendMetric('recommendation_processing_time', processingTime, {
+        experienceLevel: userData.experienceLevel
+      });
+
       // Parse the response as JSON
       let recommendations;
-      const responseText = response.response;
-      
-      // Extract JSON array if it's wrapped in code blocks or other text
-      const jsonMatch = responseText.match(/\[\s*".*"\s*\]/s) || 
-                        responseText.match(/\[\s*'.*'\s*\]/s);
-      
-      if (jsonMatch) {
-        recommendations = JSON.parse(jsonMatch[0]);
-      } else {
-        // Try to parse the entire response as JSON
-        recommendations = JSON.parse(responseText);
+      try {
+        recommendations = JSON.parse(response.response);
+      } catch (parseError) {
+        LoggingService.warning('Failed to parse OpenAI response as JSON, extracting recommendations from text', {
+          responseLength: response.response.length
+        });
+        // If parsing fails, try to extract recommendations from the text
+        recommendations = this.extractRecommendationsFromText(response.response);
       }
-      
-      // Ensure we have an array of strings
-      if (Array.isArray(recommendations)) {
-        return {
-          personalizedRecommendations: recommendations.slice(0, 5),
-          source: 'ai'
-        };
-      } else {
-        throw new Error('Response format not recognized');
+
+      // Ensure we have an array of recommendations
+      if (!Array.isArray(recommendations)) {
+        LoggingService.warning('OpenAI response is not an array, using static recommendations', {
+          responseType: typeof recommendations
+        });
+        return this.getStaticRecommendations(userData);
       }
+
+      return {
+        personalizedRecommendations: recommendations,
+        source: 'ai',
+        limitReached: false
+      };
     } catch (error) {
-      console.error('Error parsing AI recommendations:', error);
-      // Fall back to static recommendations if parsing fails
-      return this.getStaticRecommendations(userData);
+      LoggingService.logError(error, 'Error getting AI recommendations', {
+        experienceLevel,
+        substrateType
+      });
+      throw error; // Re-throw to be handled by the calling function
+    }
+  }
+
+  /**
+   * Extract recommendations from text when JSON parsing fails
+   * @param {string} text - The response text from OpenAI
+   * @returns {Array<string>} Array of extracted recommendations
+   */
+  extractRecommendationsFromText(text) {
+    try {
+      // Look for numbered lists (1. 2. 3. etc)
+      const numberedListRegex = /(\d+\.\s*[^\d\n]+)/g;
+      const numberedMatches = text.match(numberedListRegex) || [];
+      
+      if (numberedMatches.length > 0) {
+        return numberedMatches.map(match => match.replace(/^\d+\.\s*/, '').trim());
+      }
+      
+      // Look for bullet points
+      const bulletPointRegex = /(•|\*|-)(\s*[^•*\-\n]+)/g;
+      const bulletMatches = [];
+      let match;
+      
+      while ((match = bulletPointRegex.exec(text)) !== null) {
+        bulletMatches.push(match[2].trim());
+      }
+      
+      if (bulletMatches.length > 0) {
+        return bulletMatches;
+      }
+      
+      // If all else fails, split by newlines and filter out empty lines
+      return text.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && !line.startsWith('{') && !line.startsWith('}') && !line.startsWith('[') && !line.startsWith(']'));
+    } catch (error) {
+      LoggingService.warning('Error extracting recommendations from text', { error: error.message });
+      return [];
     }
   }
 
@@ -208,41 +309,41 @@ class RecommendationService {
    */
   getStaticRecommendations(userData) {
     // Get recommendations based on experience level
-    const baseRecommendations = MyceliumDataService.getRecommendationsByExperience(userData.experienceLevel);
-    
+    const experienceLevel = MyceliumDataService.experienceLevels.find(
+      level => level.id === userData.experienceLevel
+    );
+
     // Get substrate-specific recommendations
     const substrateType = MyceliumDataService.substrateTypes.find(
       type => type.id === userData.substrateType
     );
-    
-    // Add substrate-specific recommendation if available
-    let recommendations = [...baseRecommendations];
-    if (substrateType && substrateType.recommendation) {
-      recommendations.push(substrateType.recommendation);
+
+    // Combine recommendations from experience level and substrate type
+    const combinedRecommendations = [
+      ...(experienceLevel?.recommendations || []),
+      ...(substrateType?.recommendations || [])
+    ];
+
+    // Ensure we have at least some recommendations
+    if (combinedRecommendations.length === 0) {
+      LoggingService.warning('No static recommendations found for user data', userData);
+      return {
+        personalizedRecommendations: [
+          "Maintain proper humidity levels during colonization.",
+          "Ensure good air exchange during fruiting.",
+          "Keep your workspace clean and sanitized.",
+          "Monitor temperature to stay within the optimal range.",
+          "Be patient and consistent with your cultivation practices."
+        ],
+        source: 'static',
+        limitReached: false
+      };
     }
-    
-    // Add ratio-specific recommendation
-    if (userData.substrateRatio > 4) {
-      recommendations.push('Consider using a higher spawn ratio for faster colonization and reduced contamination risk.');
-    } else if (userData.substrateRatio < 3) {
-      recommendations.push('Your high spawn ratio should result in faster colonization times.');
-    }
-    
-    // Ensure we have exactly 5 recommendations
-    if (recommendations.length < 5) {
-      // Add general tips from training model to fill the gaps
-      const generalTips = trainingModel.categories
-        .flatMap(category => category.tips)
-        .slice(0, 5 - recommendations.length);
-      
-      recommendations = [...recommendations, ...generalTips];
-    } else if (recommendations.length > 5) {
-      recommendations = recommendations.slice(0, 5);
-    }
-    
+
     return {
-      personalizedRecommendations: recommendations,
-      source: 'static'
+      personalizedRecommendations: combinedRecommendations,
+      source: 'static',
+      limitReached: false
     };
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import OpenAIService from '../services/OpenAIService';
+import LoggingService from '../services/LoggingService';
 
 /**
  * MushroomFactsPanel component for displaying interesting facts about psilocybin mushrooms
@@ -13,7 +14,15 @@ const MushroomFactsPanel = () => {
 
   // Fetch an interesting fact on component mount
   useEffect(() => {
+    LoggingService.info('MushroomFactsPanel mounted');
     fetchInterestingFact();
+    
+    // Track panel view as a metric
+    LoggingService.sendMetric('mushroom_facts_panel_view', 1);
+    
+    return () => {
+      LoggingService.debug('MushroomFactsPanel unmounted');
+    };
   }, []);
 
   /**
@@ -24,6 +33,9 @@ const MushroomFactsPanel = () => {
     setError(null);
     
     try {
+      LoggingService.info('Fetching new mushroom fact');
+      const startTime = Date.now();
+      
       // Create a prompt for OpenAI
       const prompt = `Share one fascinating scientific fact about psilocybin mushrooms that most people don't know. 
       Focus on their biology, history, or ecological role - not their psychoactive effects. 
@@ -41,9 +53,29 @@ const MushroomFactsPanel = () => {
         systemPrompt: systemPrompt
       });
       
+      const endTime = Date.now();
+      const processingTime = endTime - startTime;
+      
       setFact(response.response);
+      
+      LoggingService.info('Successfully fetched mushroom fact', {
+        factLength: response.response.length,
+        processingTime
+      });
+      
+      // Track fact generation time as a metric
+      LoggingService.sendMetric('mushroom_fact_generation_time', processingTime);
+      LoggingService.sendMetric('mushroom_fact_generation_success', 1);
     } catch (err) {
-      console.error('Error fetching mushroom fact:', err);
+      LoggingService.logError(err, 'Error fetching mushroom fact', {
+        component: 'MushroomFactsPanel'
+      });
+      
+      // Track fact generation failure as a metric
+      LoggingService.sendMetric('mushroom_fact_generation_failure', 1, {
+        errorType: err.name || 'unknown'
+      });
+      
       setError('Unable to load interesting fact. Please check your API key.');
       setFact('Did you know? Mushrooms are more closely related to humans than to plants!');
     } finally {
@@ -55,7 +87,11 @@ const MushroomFactsPanel = () => {
    * Get a new fact
    */
   const handleNewFact = () => {
+    LoggingService.info('User requested new mushroom fact');
     fetchInterestingFact();
+    
+    // Track new fact button click as a metric
+    LoggingService.sendMetric('new_fact_button_click', 1);
   };
 
   return (
