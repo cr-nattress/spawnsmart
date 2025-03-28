@@ -1,20 +1,26 @@
 import React from 'react';
 
-// This is a sample component that demonstrates how to use background images
-// You can replace the placeholder with an actual image path once you add images
+/**
+ * Component that provides a full-coverage background image
+ * for the application regardless of screen size.
+ */
 const BackgroundContainer = ({ children }) => {
-    const backgroundStyle = {
-        backgroundImage: `url(${require('../assets/images/backgrounds/background.png')})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        minHeight: '100vh',
-        padding: '2rem 0'
-    };
-
     return (
-        <div style={backgroundStyle} className="bg-container">
-            <div className="container mx-auto">
+        <div className="bg-container relative w-full">
+            {/* Fixed background div that covers the entire viewport */}
+            <div 
+                className="fixed inset-0 z-0" 
+                style={{
+                    backgroundImage: `url(${require('../assets/images/backgrounds/background.png')})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundAttachment: 'fixed',
+                }}
+            />
+            
+            {/* Content container with proper z-index to appear above the background */}
+            <div className="container mx-auto relative z-10 py-8 px-4">
                 {children}
             </div>
         </div>

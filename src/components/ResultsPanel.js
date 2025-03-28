@@ -9,6 +9,7 @@ import React from 'react';
  * @param {string} props.results.substrateVolume Substrate volume in quarts
  * @param {string} props.results.totalMixVolume Total mix volume in quarts
  * @param {string} props.results.containerFill Container fill percentage
+ * @param {string} props.results.optimalMonotubVolume Optimal monotub volume in quarts
  * @param {Array} props.ingredients List of substrate ingredients with amounts
  * @returns {JSX.Element} The rendered ResultsPanel component
  */
@@ -21,6 +22,14 @@ const ResultsPanel = ({ results, ingredients }) => {
         <div>Substrate Volume: {results.substrateVolume} quarts</div>
         <div>Total Mix Volume: {results.totalMixVolume} quarts</div>
         <div>Container Fill: {results.containerFill}%</div>
+      </div>
+      
+      <h3 className="text-lg font-semibold mt-4">Optimal Monotub Size</h3>
+      <div className="mt-2 mb-4">
+        {results.optimalMonotubVolume} quarts
+        <div className="text-sm text-gray-600 mt-1">
+          Recommended container size providing adequate headspace for mushroom growth.
+        </div>
       </div>
       
       <h3 className="text-lg font-semibold mt-4">Substrate Ingredients</h3>

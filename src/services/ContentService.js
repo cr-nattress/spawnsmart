@@ -29,6 +29,7 @@ class ContentService {
    */
   loadSubstrateSuppliers() {
     this.substrateSuppliers = [
+      // Substrate suppliers
       {
         id: 'northspore',
         name: 'North Spore',
@@ -36,6 +37,7 @@ class ContentService {
         url: 'https://northspore.com/collections/sterile-substrates',
         featured: true,
         referralCode: 'MYCO10',
+        type: 'substrate',
         products: [
           { name: 'Boomr Bag', description: 'Ready-to-fruit substrate' },
           { name: 'Sterile Substrate', description: 'Various sterile options' }
@@ -48,6 +50,7 @@ class ContentService {
         url: 'https://mycolabs.com/collections/mushroom-grow-bags',
         featured: true,
         referralCode: '',
+        type: 'substrate',
         products: [
           { name: 'All-in-One Bags', description: 'Complete growing solution' },
           { name: 'Bulk Substrate Bags', description: 'For larger grows' }
@@ -60,6 +63,7 @@ class ContentService {
         url: 'https://www.mushroomsupplies.com/product-category/mushroom-substrates/',
         featured: true,
         referralCode: 'SPAWNIT',
+        type: 'substrate',
         products: [
           { name: 'Manure-Based', description: 'For coprophilic species' },
           { name: 'Hardwood-Based', description: 'For wood-loving species' }
@@ -72,6 +76,7 @@ class ContentService {
         url: 'https://www.boomershroomer.com/product/bulk-substrate/',
         featured: true,
         referralCode: '',
+        type: 'substrate',
         products: [
           { name: 'CVG Mix', description: 'Ready-to-use CVG substrate' },
           { name: 'Bulk Casing', description: 'For casing layers' }
@@ -84,9 +89,146 @@ class ContentService {
         url: 'https://midnightmushroom.co/collections/manure-based-substrates',
         featured: true,
         referralCode: 'SPAWNIT10',
+        type: 'substrate',
         products: [
           { name: 'Horse Manure', description: 'Pasteurized and ready to use' },
           { name: 'Specialty Mixes', description: 'Custom substrate blends' }
+        ]
+      },
+      
+      // Spore suppliers
+      {
+        id: 'pnwspore',
+        name: 'PNW Spore Co.',
+        description: 'Quality microscopy supplies',
+        url: 'https://pnwspore.com/',
+        featured: true,
+        referralCode: '',
+        type: 'spores',
+        products: [
+          { name: 'Spore Syringes', description: 'For microscopy research' },
+          { name: 'Spore Prints', description: 'Various species available' }
+        ]
+      },
+      {
+        id: 'highdesertspores',
+        name: 'High Desert Spores',
+        description: 'Premium microscopy supplies',
+        url: 'https://highdesertspores.com/',
+        featured: true,
+        referralCode: '',
+        type: 'spores',
+        products: [
+          { name: 'Microscopy Kits', description: 'Complete research kits' },
+          { name: 'Exotic Varieties', description: 'Rare spore varieties' }
+        ]
+      },
+      {
+        id: 'sporeworks',
+        name: 'SporeWorks',
+        description: 'Trusted source for microscopy supplies',
+        url: 'https://sporeworks.com/',
+        featured: true,
+        referralCode: '',
+        type: 'spores',
+        products: [
+          { name: 'Spore Syringes', description: 'For microscopy research' },
+          { name: 'Spore Prints', description: 'Various species available' }
+        ]
+      },
+      {
+        id: 'lilshopofspores',
+        name: 'Lil\' Shop of Spores',
+        description: 'Quality microscopy supplies',
+        url: 'https://lilshopofspores.com/',
+        featured: true,
+        referralCode: '',
+        type: 'spores',
+        products: [
+          { name: 'Microscopy Kits', description: 'Complete research kits' },
+          { name: 'Exotic Varieties', description: 'Rare spore varieties' }
+        ]
+      },
+      
+      // Grain suppliers
+      {
+        id: 'shroomsupply',
+        name: 'Shroom Supply',
+        description: 'Pre-sterilized grain spawn bags',
+        url: 'https://www.shroomsupply.com/grain-spawn',
+        featured: true,
+        referralCode: 'SPAWN10',
+        type: 'grain',
+        products: [
+          { name: 'Rye Berries', description: 'Classic grain spawn option' },
+          { name: 'Millet Spawn', description: 'Small grain for faster colonization' }
+        ]
+      },
+      {
+        id: 'outgrow',
+        name: 'Out-Grow',
+        description: 'Quality grain spawn products',
+        url: 'https://www.out-grow.com/grain-spawn-bags/',
+        featured: true,
+        referralCode: '',
+        type: 'grain',
+        products: [
+          { name: 'Sterilized Grain Bags', description: 'Ready to inoculate' },
+          { name: 'Master\'s Mix', description: 'Premium grain blend' }
+        ]
+      },
+      {
+        id: 'myctyson',
+        name: 'Myc Tyson',
+        description: 'Premium grain spawn bags',
+        url: 'https://myctyson.com/shop/colonized-mushroom-substrates/sterilized-grain-bags/',
+        featured: false,
+        referralCode: '',
+        type: 'grain',
+        products: [
+          { name: 'Rye Grain Bags', description: 'Professional quality' },
+          { name: 'Wild Bird Seed', description: 'Economical option' }
+        ]
+      },
+      
+      // Accessories suppliers
+      {
+        id: 'midwestgrowkits',
+        name: 'Midwest Grow Kits',
+        description: 'Complete growing equipment',
+        url: 'https://www.midwestgrowkits.com/mushroom-growing-supplies/',
+        featured: true,
+        referralCode: 'SPAWNIT15',
+        type: 'accessories',
+        products: [
+          { name: 'Monotubs', description: 'Professional growing containers' },
+          { name: 'Humidity Controllers', description: 'Automated environment control' }
+        ]
+      },
+      {
+        id: 'mycosupply',
+        name: 'Myco Supply',
+        description: 'Cultivation tools and equipment',
+        url: 'https://mycosupply.com/product-category/tools-equipment/',
+        featured: true,
+        referralCode: '',
+        type: 'accessories',
+        products: [
+          { name: 'Flow Hoods', description: 'Professional lab equipment' },
+          { name: 'Pressure Cookers', description: 'For sterilization' }
+        ]
+      },
+      {
+        id: 'fungi',
+        name: 'Fungi.com',
+        description: 'Premium cultivation supplies',
+        url: 'https://fungi.com/collections/cultivation-equipment',
+        featured: false,
+        referralCode: 'FUNGI10',
+        type: 'accessories',
+        products: [
+          { name: 'Grow Chambers', description: 'Professional fruiting chambers' },
+          { name: 'Cultivation Books', description: 'Educational resources' }
         ]
       }
     ];
@@ -159,12 +301,12 @@ class ContentService {
     this.componentContent = {
       header: {
         title: "SpawnSmart",
-        description: "Your intelligent calculator for perfect mushroom cultivation - optimize spawn-to-substrate ratios for maximum yields, faster colonization, and professional results."
+        description: "The Ultimate Mushroom Cultivation Tool – Calculate spawn ratios, boost yields, and achieve pro-level results. Perfect for all skill levels!"
       },
       calculator: {
         header: {
           title: "SpawnSmart",
-          description: "Your intelligent calculator for perfect mushroom cultivation - optimize spawn-to-substrate ratios for maximum yields, faster colonization, and professional results."
+          description: "The Ultimate Mushroom Cultivation Tool – Calculate spawn ratios, boost yields, and achieve pro-level results. Perfect for all skill levels!"
         },
         formLabels: {
           experienceLevel: "Experience Level",
@@ -174,8 +316,8 @@ class ContentService {
           containerSize: "Container Size (quarts)"
         },
         buttons: {
-          save: "Save Settings",
-          reset: "Reset to Defaults"
+          save: "Save",
+          reset: "Reset"
         },
         alerts: {
           saveSuccess: "Settings saved successfully!",
@@ -233,7 +375,7 @@ class ContentService {
         noRecommendationsText: "Complete the form to see personalized recommendations."
       },
       substrateSuppliers: {
-        title: "Substrate Suppliers",
+        title: "Suppliers",
         disclaimer: "* Affiliate links support this calculator",
         viewAllText: "View All",
         featuredOnlyText: "Featured Only"
@@ -259,6 +401,26 @@ class ContentService {
    */
   getFeaturedSuppliers() {
     return this.substrateSuppliers.filter(supplier => supplier.featured);
+  }
+  
+  /**
+   * Get all suppliers by type
+   * 
+   * @param {string} type Type of suppliers (spores, grain, substrate, accessories)
+   * @returns {Array} Array of suppliers of the specified type
+   */
+  getAllSuppliersByType(type) {
+    return this.substrateSuppliers.filter(supplier => supplier.type === type);
+  }
+  
+  /**
+   * Get featured suppliers by type
+   * 
+   * @param {string} type Type of suppliers (spores, grain, substrate, accessories)
+   * @returns {Array} Array of featured suppliers of the specified type
+   */
+  getFeaturedSuppliersByType(type) {
+    return this.substrateSuppliers.filter(supplier => supplier.featured && supplier.type === type);
   }
 
   /**

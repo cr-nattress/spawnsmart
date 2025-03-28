@@ -68,8 +68,20 @@
         @apply bg-note-bg p-4 rounded-lg text-sm;
     }
     
-    /* Custom Grid Layout */
+    /* Custom Grid Layout - Responsive */
     .custom-grid-2 {
-        @apply grid grid-cols-2 gap-6;
+        @apply grid grid-cols-1 gap-6 md:grid-cols-2;
+    }
+    
+    /* Additional responsive layout classes */
+    @media (max-width: 768px) {
+        .custom-grid-2 {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .custom-grid-2 > div {
+            margin-bottom: 1.5rem;
+        }
     }
 }

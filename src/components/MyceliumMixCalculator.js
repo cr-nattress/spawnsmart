@@ -10,7 +10,7 @@ import RecommendationsPanel from './RecommendationsPanel';
 /* Temporarily hidden AI Cultivation Advisor */
 /* import AIAdvicePanel from './AIAdvicePanel'; */
 import MushroomFactsPanel from './MushroomFactsPanel';
-import SubstrateSupplierLinks from './SubstrateSupplierLinks';
+import TabbedSupplierLinks from './TabbedSupplierLinks';
 
 const MyceliumMixCalculator = () => {
     // Get content from ContentService
@@ -205,109 +205,128 @@ const MyceliumMixCalculator = () => {
     };
 
     return (
-        <div className="card custom-grid-2">
-            <div>
+        <div className="flex flex-col items-center w-full">
+            {/* Header - Always at the top, spans both columns */}
+            <div className="w-full card bg-card-bg p-6 rounded-2xl shadow-md mb-6">
                 <Header />
-                <div className="mt-6">
-                    <label>{content.formLabels.experienceLevel}</label>
-                    <select 
-                        className="input mt-1 w-full" 
-                        value={userData.experienceLevel} 
-                        onChange={handleExperienceLevelChange}
-                        onBlur={handleInputBlur}
-                    >
-                        {MyceliumDataService.experienceLevels.map(level => (
-                            <option key={level.id} value={level.id}>{level.label}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="mt-6">
-                    <label>{content.formLabels.spawnAmount}</label>
-                    <input 
-                        type="number" 
-                        className="input mt-1 w-full" 
-                        value={userData.spawnAmount} 
-                        onChange={handleSpawnAmountChange} 
-                        onBlur={handleInputBlur}
-                    />
-                </div>
-
-                <div className="mt-6">
-                    <label>{content.formLabels.substrateRatio} (1:{userData.substrateRatio})</label>
-                    <input 
-                        type="range" 
-                        className="slider mt-1 w-full" 
-                        min="1" 
-                        max="6" 
-                        value={userData.substrateRatio} 
-                        onChange={handleSubstrateRatioChange} 
-                        onBlur={handleInputBlur}
-                    />
-                </div>
-
-                <div className="mt-6">
-                    <label>{content.formLabels.substrateType}</label>
-                    <select 
-                        className="input mt-1 w-full" 
-                        value={userData.substrateType} 
-                        onChange={handleSubstrateTypeChange}
-                        onBlur={handleInputBlur}
-                    >
-                        {MyceliumDataService.substrateTypes.map(type => (
-                            <option key={type.id} value={type.id}>{type.label}</option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="mt-6">
-                    <label>{content.formLabels.containerSize}</label>
-                    <input 
-                        type="number" 
-                        className="input mt-1 w-full" 
-                        value={userData.containerSize} 
-                        onChange={handleContainerSizeChange} 
-                        onBlur={handleInputBlur}
-                    />
-                </div>
-
-                <div className="mt-8 flex space-x-4">
-                    <button 
-                        className="btn btn-primary flex-1" 
-                        onClick={handleSaveData}
-                    >
-                        {content.buttons.save}
-                    </button>
-                    <button 
-                        className="btn btn-secondary flex-1" 
-                        onClick={handleResetData}
-                    >
-                        {content.buttons.reset}
-                    </button>
-                </div>
             </div>
+            
+            {/* Two-column layout for desktop, single column for mobile */}
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* First Row - Calculator and Results */}
+                <div className="w-full card bg-card-bg p-6 rounded-2xl shadow-md h-full flex flex-col">
+                    <div className="flex-grow">
+                        <h2 className="text-xl font-semibold">Calculator</h2>
+                        <div className="mt-6">
+                            <label>{content.formLabels.experienceLevel}</label>
+                            <select 
+                                className="input mt-1 w-full" 
+                                value={userData.experienceLevel} 
+                                onChange={handleExperienceLevelChange}
+                                onBlur={handleInputBlur}
+                            >
+                                {MyceliumDataService.experienceLevels.map(level => (
+                                    <option key={level.id} value={level.id}>{level.label}</option>
+                                ))}
+                            </select>
+                        </div>
 
-            <div>
-                <ResultsPanel results={results} ingredients={results.ingredients} />
-                
-                <div className="flex flex-col flex-grow">
-                    {isFormComplete && recommendationsLoaded && hasLostFocus ? (
-                        <RecommendationsPanel 
-                            recommendations={recommendations} 
-                            cultivationTips={MyceliumDataService.cultivationTips.slice(0, 6)} 
-                            userData={userData}
-                        />
-                    ) : (
-                        <MushroomFactsPanel />
-                    )}
-                    
-                    {/* Substrate supplier links section */}
-                    <SubstrateSupplierLinks />
+                        <div className="mt-6">
+                            <label>{content.formLabels.spawnAmount}</label>
+                            <input 
+                                type="number" 
+                                className="input mt-1 w-full" 
+                                value={userData.spawnAmount} 
+                                onChange={handleSpawnAmountChange} 
+                                onBlur={handleInputBlur}
+                            />
+                        </div>
+
+                        <div className="mt-6">
+                            <label>{content.formLabels.substrateRatio} (1:{userData.substrateRatio})</label>
+                            <input 
+                                type="range" 
+                                className="slider mt-1 w-full" 
+                                min="1" 
+                                max="6" 
+                                value={userData.substrateRatio} 
+                                onChange={handleSubstrateRatioChange} 
+                                onBlur={handleInputBlur}
+                            />
+                        </div>
+
+                        <div className="mt-6">
+                            <label>{content.formLabels.substrateType}</label>
+                            <select 
+                                className="input mt-1 w-full" 
+                                value={userData.substrateType} 
+                                onChange={handleSubstrateTypeChange}
+                                onBlur={handleInputBlur}
+                            >
+                                {MyceliumDataService.substrateTypes.map(type => (
+                                    <option key={type.id} value={type.id}>{type.label}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="mt-6">
+                            <label>{content.formLabels.containerSize}</label>
+                            <input 
+                                type="number" 
+                                className="input mt-1 w-full" 
+                                value={userData.containerSize} 
+                                onChange={handleContainerSizeChange} 
+                                onBlur={handleInputBlur}
+                            />
+                        </div>
+
+                        <div className="mt-8 flex space-x-4">
+                            <button 
+                                className="btn btn-primary flex-1" 
+                                onClick={handleSaveData}
+                            >
+                                {content.buttons.save}
+                            </button>
+                            <button 
+                                className="btn btn-secondary flex-1" 
+                                onClick={handleResetData}
+                            >
+                                {content.buttons.reset}
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 
-                {/* Temporarily hidden AI Cultivation Advisor */}
-                {/* <AIAdvicePanel userData={userData} /> */}
+                <div className="w-full card bg-card-bg p-6 rounded-2xl shadow-md h-full flex flex-col">
+                    <div className="flex-grow">
+                        <ResultsPanel results={results} ingredients={results.ingredients} />
+                    </div>
+                </div>
+                
+                {/* Second Row - Supplier Links and Recommendations */}
+                <div className="w-full card bg-card-bg p-6 rounded-2xl shadow-md h-full flex flex-col">
+                    <div className="flex-grow">
+                        <TabbedSupplierLinks />
+                    </div>
+                </div>
+                
+                <div className="w-full card bg-card-bg p-6 rounded-2xl shadow-md h-full flex flex-col">
+                    <div className="flex-grow">
+                        {isFormComplete && recommendationsLoaded && hasLostFocus ? (
+                            <RecommendationsPanel 
+                                recommendations={recommendations} 
+                                cultivationTips={MyceliumDataService.cultivationTips.slice(0, 6)} 
+                                userData={userData}
+                            />
+                        ) : (
+                            <MushroomFactsPanel />
+                        )}
+                    </div>
+                </div>
             </div>
+            
+            {/* Temporarily hidden AI Cultivation Advisor */}
+            {/* <AIAdvicePanel userData={userData} /> */}
         </div>
     );
 };

@@ -23,6 +23,7 @@ class UserDataService {
       substrateVolume: '2.0',
       totalMixVolume: '3.0',
       containerFill: '60.0',
+      optimalMonotubVolume: '6.0',
       ingredients: []
     };
 
@@ -103,6 +104,9 @@ class UserDataService {
     const totalMixVolume = (parseFloat(spawnAmount) + parseFloat(substrateVolume)).toFixed(1);
     const containerFill = ((totalMixVolume / containerSize) * 100).toFixed(1);
     
+    // Calculate optimal monotub volume (total mix volume * 2 for headspace)
+    const optimalMonotubVolume = (parseFloat(totalMixVolume) * 2).toFixed(1);
+    
     // Get ingredients based on substrate type and volume
     const ingredients = MyceliumDataService.calculateSubstrateIngredients(
       substrateType, 
@@ -114,6 +118,7 @@ class UserDataService {
       substrateVolume,
       totalMixVolume,
       containerFill,
+      optimalMonotubVolume,
       ingredients
     };
 
