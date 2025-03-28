@@ -1,0 +1,75 @@
+/* Tailwind CSS Stylesheet for Mycelium Mix Calculator Web App */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Color Palette */
+:root {
+    --primary-bg: #F0F4F8; /* Light grey background */
+    --primary-text: #1F2937; /* Dark grey text */
+    --secondary-text: #4B5563; /* Medium grey text */
+    --highlight-bg: #2563EB; /* Blue for highlights and buttons */
+    --highlight-text: #FFFFFF; /* White text for contrast */
+    --card-bg: #FFFFFF; /* White background for cards */
+    --border-color: #D1D5DB; /* Light grey borders */
+    --note-bg: #E0F2FE; /* Light blue background for notes */
+}
+
+@layer base {
+    /* General Styles */
+    body {
+        @apply bg-primary-bg text-primary-text;
+    }
+
+    h1 {
+        @apply text-3xl font-bold mb-4;
+    }
+
+    h2 {
+        @apply text-xl font-semibold mb-2;
+    }
+
+    p, label, span {
+        @apply text-secondary-text;
+    }
+}
+
+@layer components {
+    /* Cards & Containers */
+    .card {
+        @apply bg-card-bg p-6 rounded-2xl shadow-md;
+    }
+
+    /* Buttons */
+    .button {
+        @apply bg-highlight-bg text-highlight-text py-2 px-4 rounded-lg hover:bg-blue-700 transition;
+    }
+    
+    /* New Button Styles */
+    .btn {
+        @apply py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-center;
+    }
+    
+    .btn-primary {
+        @apply bg-highlight-bg text-highlight-text hover:bg-blue-700;
+    }
+    
+    .btn-secondary {
+        @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+    }
+
+    /* Inputs & Sliders */
+    .input, .select, .slider {
+        @apply border border-border-color rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-highlight-bg;
+    }
+
+    /* Notes Section */
+    .notes {
+        @apply bg-note-bg p-4 rounded-lg text-sm;
+    }
+    
+    /* Custom Grid Layout */
+    .custom-grid-2 {
+        @apply grid grid-cols-2 gap-6;
+    }
+}

@@ -1,0 +1,60 @@
+{
+    "title": "Psilocybe Mushroom Cultivation Tips (Post-Spawn, Pre-Fruiting)",
+    "categories": [
+      {
+        "category_name": "Optimizing Colonization Conditions",
+        "tips": [
+          "Maintain temperature around 70–75°F (21–24°C) for ideal growth. Avoid temperatures above 80°F (27°C).", 
+          "Ensure high humidity and avoid drafts by keeping containers closed during colonization.", 
+          "Encourage CO₂ buildup by keeping the lid sealed, promoting rapid growth.", 
+          "Provide minimal gas exchange through imperfect lid seals or filter patches.", 
+          "Avoid direct sunlight; ambient light is okay but not necessary during colonization."
+        ]
+      },
+      {
+        "category_name": "Preventing Contamination",
+        "tips": [
+          "Use fully colonized spawn to avoid contaminant growth during bulk mixing.", 
+          "Practice clean techniques during spawning, even though it's past sterility.", 
+          "Use a higher spawn-to-substrate ratio (1:2 to 1:4) for faster colonization.", 
+          "Thoroughly mix spawn and bulk for even colonization.", 
+          "Cover exposed grains with a light layer of bulk substrate to prevent mold.", 
+          "Consider adding a casing layer to protect colonizing mycelium.", 
+          "Line the bottom of tubs with a liner to reduce side pins and contamination.", 
+          "Keep the grow area clean and place tubs in low-traffic, elevated spots.", 
+          "Do not spray disinfectants around colonizing tubs."
+        ]
+      },
+      {
+        "category_name": "Handling and Storing the Spawn-Substrate Mix",
+        "tips": [
+          "Gently level the substrate surface without packing it down.", 
+          "Avoid disturbing the colonizing tub; set and forget for best results.", 
+          "Choose a stable incubation spot with consistent room temperature.", 
+          "Monitor progress by viewing through container walls, not by opening the lid."
+        ]
+      },
+      {
+        "category_name": "Initiating Fruiting Conditions",
+        "tips": [
+          "Wait for full colonization before initiating fruiting (9–14 days on average).", 
+          "Look for signs of readiness, such as hyphal knots or substrate pulling away from sides.", 
+          "Introduce fresh air exchange by opening vents or loosening the lid.", 
+          "Provide indirect light for 12 hours a day during fruiting.", 
+          "Keep surface conditions humid by lightly misting if necessary."
+        ]
+      },
+      {
+        "category_name": "Troubleshooting Slow or Stalled Colonization",
+        "tips": [
+          "Be patient; colonization can take 2 weeks or more depending on conditions.", 
+          "Check moisture content; too wet or too dry substrates can hinder growth.", 
+          "Ensure some gas exchange to prevent suffocation or dormancy.", 
+          "Verify spawn health to rule out contamination issues.", 
+          "Address contamination immediately by removing affected areas if possible.", 
+          "Allow more time if mycelium looks healthy but is progressing slowly."
+        ]
+      }
+    ]
+  }
+  

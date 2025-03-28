@@ -1,0 +1,248 @@
+/**
+ * OpenAIService.js
+ * 
+ * This service handles communication with the OpenAI API,
+ * including sending messages, receiving responses, and managing training data.
+ */
+
+import axios from 'axios';
+
+class OpenAIService {
+  constructor() {
+    // Try to get API key from environment variables
+    this.apiKey = process.env.REACT_APP_OPENAI_API_KEY || null;
+    this.baseURL = 'https://api.openai.com/v1';
+    // Try to get model from environment variables, default to gpt-4o
+    this.model = process.env.REACT_APP_OPENAI_MODEL || 'gpt-4o';
+    this.trainingData = [];
+    this.conversationHistory = [];
+    
+    // Load training data from localStorage on initialization
+    this.loadTrainingDataFromLocalStorage();
+  }
+
+  /**
+   * Set the OpenAI API key
+   * @param {string} apiKey - The OpenAI API key
+   */
+  setApiKey(apiKey) {
+    this.apiKey = apiKey;
+  }
+
+  /**
+   * Set the model to use for requests
+   * @param {string} model - The model name (e.g., 'gpt-4o', 'gpt-3.5-turbo')
+   */
+  setModel(model) {
+    this.model = model;
+  }
+
+  /**
+   * Get the headers for API requests
+   * @returns {Object} Headers object with authorization
+   */
+  getHeaders() {
+    if (!this.apiKey) {
+      throw new Error('API key not set. Please call setApiKey() first.');
+    }
+    
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${this.apiKey}`
+    };
+  }
+
+  /**
+   * Send a message to OpenAI and get a response
+   * @param {string} message - The message to send
+   * @param {Object} options - Additional options for the request
+   * @param {boolean} options.saveToHistory - Whether to save this exchange to conversation history
+   * @param {boolean} options.saveToTrainingData - Whether to save this exchange to training data
+   * @param {Array} options.systemPrompt - Optional system prompt to include
+   * @returns {Promise<Object>} The response from OpenAI
+   */
+  async sendMessage(message, options = {}) {
+    const {
+      saveToHistory = true,
+      saveToTrainingData = false,
+      systemPrompt = "You are a helpful assistant specializing in mushroom cultivation."
+    } = options;
+
+    try {
+      if (!this.apiKey) {
+        throw new Error('API key not set. Please call setApiKey() first.');
+      }
+
+      // Prepare messages array with system prompt and conversation history
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        ...this.conversationHistory,
+        { role: 'user', content: message }
+      ];
+
+      // Make the API request
+      const response = await axios.post(
+        `${this.baseURL}/chat/completions`,
+        {
+          model: this.model,
+          messages: messages,
+          temperature: 0.7,
+          max_tokens: 1000
+        },
+        { headers: this.getHeaders() }
+      );
+
+      // Extract the assistant's response
+      const assistantResponse = response.data.choices[0].message.content;
+
+      // Save to conversation history if requested
+      if (saveToHistory) {
+        this.conversationHistory.push(
+          { role: 'user', content: message },
+          { role: 'assistant', content: assistantResponse }
+        );
+      }
+
+      // Save to training data if requested
+      if (saveToTrainingData) {
+        this.addToTrainingData({
+          input: message,
+          output: assistantResponse,
+          timestamp: new Date().toISOString(),
+          model: this.model
+        });
+      }
+
+      return {
+        response: assistantResponse,
+        fullResponse: response.data
+      };
+    } catch (error) {
+      console.error('Error calling OpenAI API:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Add an exchange to the training data
+   * @param {Object} data - The data to add
+   * @param {string} data.input - The user input
+   * @param {string} data.output - The model output
+   * @param {string} data.timestamp - The timestamp of the exchange
+   * @param {string} data.model - The model used
+   */
+  addToTrainingData(data) {
+    this.trainingData.push(data);
+  }
+
+  /**
+   * Get all training data
+   * @returns {Array} The training data
+   */
+  getTrainingData() {
+    return this.trainingData;
+  }
+
+  /**
+   * Export training data to JSON
+   * @returns {string} JSON string of training data
+   */
+  exportTrainingData() {
+    return JSON.stringify(this.trainingData, null, 2);
+  }
+
+  /**
+   * Import training data from JSON
+   * @param {string} jsonData - JSON string of training data
+   */
+  importTrainingData(jsonData) {
+    try {
+      const data = JSON.parse(jsonData);
+      if (Array.isArray(data)) {
+        this.trainingData = data;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error importing training data:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Save training data to localStorage
+   * @returns {boolean} Whether the save was successful
+   */
+  saveTrainingDataToLocalStorage() {
+    try {
+      localStorage.setItem('openaiTrainingData', this.exportTrainingData());
+      return true;
+    } catch (error) {
+      console.error('Error saving training data to localStorage:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Load training data from localStorage
+   * @returns {boolean} Whether the load was successful
+   */
+  loadTrainingDataFromLocalStorage() {
+    try {
+      const data = localStorage.getItem('openaiTrainingData');
+      if (data) {
+        return this.importTrainingData(data);
+      }
+      return false;
+    } catch (error) {
+      console.error('Error loading training data from localStorage:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Clear conversation history
+   */
+  clearConversationHistory() {
+    this.conversationHistory = [];
+  }
+
+  /**
+   * Get the current conversation history
+   * @returns {Array} The conversation history
+   */
+  getConversationHistory() {
+    return this.conversationHistory;
+  }
+
+  /**
+   * Generate cultivation advice based on user data
+   * @param {Object} userData - The user's cultivation data
+   * @returns {Promise<string>} Personalized cultivation advice
+   */
+  async generateCultivationAdvice(userData) {
+    const prompt = `
+      I'm growing mushrooms with the following setup:
+      - Experience level: ${userData.experienceLevel}
+      - Spawn amount: ${userData.spawnAmount} quarts
+      - Substrate ratio: 1:${userData.substrateRatio}
+      - Substrate type: ${userData.substrateType}
+      - Container size: ${userData.containerSize} quarts
+      
+      Based on this information, can you provide me with personalized cultivation advice?
+      Include tips on optimal conditions, potential issues to watch for, and how to maximize yield.
+    `;
+
+    const response = await this.sendMessage(prompt, {
+      saveToHistory: false,
+      systemPrompt: "You are a mycology expert specializing in mushroom cultivation. Provide concise, accurate advice for mushroom growers based on their specific setup. Focus on practical tips that will help them succeed."
+    });
+
+    return response.response;
+  }
+}
+
+// Create a singleton instance
+const openAIServiceInstance = new OpenAIService();
+
+export default openAIServiceInstance;

@@ -1,4 +1,53 @@
-# Getting Started with Create React App
+# SpawnSmart
+
+Your intelligent calculator for perfect mushroom cultivation - optimize spawn-to-substrate ratios for maximum yields, faster colonization, and professional results.
+
+## Features
+
+- Calculate substrate amounts based on spawn quantity
+- Get recommendations based on experience level
+- View detailed substrate ingredient breakdowns
+- Save user preferences locally
+- AI-powered cultivation advice using OpenAI
+
+## Environment Variables
+
+This project uses environment variables for configuration. Create a `.env` file in the root directory with the following variables:
+
+```
+REACT_APP_OPENAI_API_KEY=your_openai_api_key_here
+REACT_APP_OPENAI_MODEL=gpt-4o
+```
+
+You can copy the `.env.example` file and replace the values with your own.
+
+## Services
+
+### MyceliumDataService
+
+Provides structured data for the calculator, including:
+- Experience levels with recommendations
+- Substrate types with composition ratios
+- Container size options
+- General cultivation tips
+
+### UserDataService
+
+Manages user-selected data and calculation results:
+- Updates user preferences
+- Saves/loads data from localStorage
+- Calculates results based on user input
+- Resets to default values
+
+### OpenAIService
+
+Connects to the OpenAI API to provide AI-powered cultivation advice:
+- Sends messages to OpenAI and processes responses
+- Manages conversation history for context
+- Collects and stores training data locally
+- Generates personalized cultivation recommendations
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
