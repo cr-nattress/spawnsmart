@@ -1,0 +1,25 @@
+{
+  "fields": {
+    "name": {
+      "en-US": "Boomr Bag"
+    },
+    "description": {
+      "en-US": "Ready-to-fruit substrate"
+    },
+    "price": {
+      "en-US": "$29.99"
+    },
+    "url": {
+      "en-US": "https://northspore.com/products/boomr-bag"
+    },
+    "supplier": {
+      "en-US": {
+        "sys": {
+          "type": "Link",
+          "linkType": "Entry",
+          "id": "northspore-supplier-entry-id"
+        }
+      }
+    }
+  }
+}

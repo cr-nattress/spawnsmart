@@ -1,0 +1,38 @@
+{
+  "name": "MushroomFact",
+  "description": "Interesting facts about mushrooms",
+  "displayField": "fact",
+  "fields": [
+    {
+      "id": "fact",
+      "name": "Fact",
+      "type": "Text",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "category",
+      "name": "Category",
+      "type": "Symbol",
+      "required": false,
+      "validations": [
+        {
+          "in": ["biology", "ecology", "history", "science"]
+        }
+      ]
+    },
+    {
+      "id": "source",
+      "name": "Source",
+      "type": "Symbol",
+      "required": false
+    },
+    {
+      "id": "image",
+      "name": "Related Image",
+      "type": "Link",
+      "linkType": "Asset",
+      "required": false
+    }
+  ]
+}

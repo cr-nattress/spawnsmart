@@ -1,0 +1,22 @@
+{
+  "fields": {
+    "name": {
+      "en-US": "North Spore"
+    },
+    "description": {
+      "en-US": "Premium sterile substrates"
+    },
+    "url": {
+      "en-US": "https://northspore.com/collections/sterile-substrates"
+    },
+    "featured": {
+      "en-US": true
+    },
+    "referralCode": {
+      "en-US": "MYCO10"
+    },
+    "type": {
+      "en-US": "substrate"
+    }
+  }
+}

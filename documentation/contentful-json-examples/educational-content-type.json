@@ -1,0 +1,87 @@
+{
+  "name": "EducationalContent",
+  "description": "Educational articles and guides",
+  "displayField": "title",
+  "fields": [
+    {
+      "id": "title",
+      "name": "Title",
+      "type": "Symbol",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "description",
+      "name": "Description",
+      "type": "Text",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "content",
+      "name": "Content",
+      "type": "RichText",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "slug",
+      "name": "Slug",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "unique": true
+        },
+        {
+          "regexp": {
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "flags": null
+          }
+        }
+      ]
+    },
+    {
+      "id": "category",
+      "name": "Category",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "in": ["beginner-guides", "advanced-techniques", "troubleshooting"]
+        }
+      ]
+    },
+    {
+      "id": "tags",
+      "name": "Tags",
+      "type": "Array",
+      "items": {
+        "type": "Symbol"
+      },
+      "required": false
+    },
+    {
+      "id": "featuredImage",
+      "name": "Featured Image",
+      "type": "Link",
+      "linkType": "Asset",
+      "required": false
+    },
+    {
+      "id": "relatedSpores",
+      "name": "Related Spores",
+      "type": "Array",
+      "items": {
+        "type": "Link",
+        "linkType": "Entry",
+        "validations": [
+          {
+            "linkContentType": ["spore"]
+          }
+        ]
+      },
+      "required": false
+    }
+  ]
+}

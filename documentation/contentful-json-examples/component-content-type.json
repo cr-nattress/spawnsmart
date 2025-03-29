@@ -1,0 +1,48 @@
+{
+  "name": "ComponentContent",
+  "description": "Reusable UI component text and labels",
+  "displayField": "componentId",
+  "fields": [
+    {
+      "id": "componentId",
+      "name": "Component ID",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "unique": true
+        }
+      ]
+    },
+    {
+      "id": "section",
+      "name": "Section",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "in": ["header", "calculator", "resultsPanel", "aiAdvice", "mushroomFacts", "recommendations", "substrateSuppliers"]
+        }
+      ]
+    },
+    {
+      "id": "key",
+      "name": "Content Key",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "value",
+      "name": "Content Value",
+      "type": "Text",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "description",
+      "name": "Description",
+      "type": "Text",
+      "required": false
+    }
+  ]
+}

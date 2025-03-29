@@ -1,0 +1,75 @@
+{
+  "fields": {
+    "title": {
+      "en-US": "Getting Started with Mushroom Cultivation"
+    },
+    "description": {
+      "en-US": "Learn the basics of mushroom cultivation, including terminology, equipment, and processes."
+    },
+    "content": {
+      "en-US": {
+        "nodeType": "document",
+        "data": {},
+        "content": [
+          {
+            "nodeType": "heading-1",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "text",
+                "value": "Getting Started with Mushroom Cultivation",
+                "marks": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "nodeType": "paragraph",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "text",
+                "value": "This guide will introduce you to the basic concepts, terminology, and equipment needed to start your mushroom cultivation journey.",
+                "marks": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "nodeType": "heading-2",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "text",
+                "value": "Basic Terminology",
+                "marks": [],
+                "data": {}
+              }
+            ]
+          },
+          {
+            "nodeType": "paragraph",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "text",
+                "value": "Understanding the language of mushroom cultivation is the first step to success.",
+                "marks": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "slug": {
+      "en-US": "getting-started-mushroom-cultivation"
+    },
+    "category": {
+      "en-US": "beginner-guides"
+    },
+    "tags": {
+      "en-US": ["beginner", "basics", "equipment"]
+    }
+  }
+}

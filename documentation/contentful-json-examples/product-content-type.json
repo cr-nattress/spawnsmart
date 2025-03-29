@@ -1,0 +1,52 @@
+{
+  "name": "Product",
+  "description": "Products offered by suppliers",
+  "displayField": "name",
+  "fields": [
+    {
+      "id": "name",
+      "name": "Name",
+      "type": "Symbol",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "description",
+      "name": "Description",
+      "type": "Symbol",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "price",
+      "name": "Price",
+      "type": "Symbol",
+      "required": false
+    },
+    {
+      "id": "url",
+      "name": "Product URL",
+      "type": "Symbol",
+      "required": false
+    },
+    {
+      "id": "image",
+      "name": "Product Image",
+      "type": "Link",
+      "linkType": "Asset",
+      "required": false
+    },
+    {
+      "id": "supplier",
+      "name": "Supplier",
+      "type": "Link",
+      "linkType": "Entry",
+      "required": true,
+      "validations": [
+        {
+          "linkContentType": ["supplier"]
+        }
+      ]
+    }
+  ]
+}

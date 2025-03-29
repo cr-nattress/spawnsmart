@@ -1,0 +1,45 @@
+{
+  "fields": {
+    "name": {
+      "en-US": "Golden Teacher Spores"
+    },
+    "mushroomType": {
+      "en-US": "Psilocybe cubensis"
+    },
+    "subtype": {
+      "en-US": "Golden Teacher"
+    },
+    "description": {
+      "en-US": "Golden Teacher is one of the most popular cubensis varieties, known for its balanced effects and reliable growth."
+    },
+    "growingConditions": {
+      "en-US": "Beginner-friendly; grows well indoors in warm, humid environments using standard substrates like brown rice flour or manure."
+    },
+    "sizeAppearance": {
+      "en-US": "Medium-sized with golden-yellow caps, up to 8 cm wide, and slender pale stems."
+    },
+    "strength": {
+      "en-US": "Moderate to Strong"
+    },
+    "moodEffects": {
+      "en-US": "Euphoric, uplifting, introspective."
+    },
+    "difficulty": {
+      "en-US": "Beginner"
+    },
+    "colonizationTime": {
+      "en-US": "10-14 days"
+    },
+    "suppliers": {
+      "en-US": [
+        {
+          "sys": {
+            "type": "Link",
+            "linkType": "Entry",
+            "id": "pnw-spore-supplier-entry-id"
+          }
+        }
+      ]
+    }
+  }
+}

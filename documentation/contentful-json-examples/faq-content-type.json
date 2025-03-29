@@ -1,0 +1,53 @@
+{
+  "name": "FAQ",
+  "description": "Frequently asked questions",
+  "displayField": "question",
+  "fields": [
+    {
+      "id": "question",
+      "name": "Question",
+      "type": "Symbol",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "answer",
+      "name": "Answer",
+      "type": "RichText",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "category",
+      "name": "Category",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "in": ["general", "cultivation", "spores", "substrates"]
+        }
+      ]
+    },
+    {
+      "id": "order",
+      "name": "Display Order",
+      "type": "Integer",
+      "required": false
+    },
+    {
+      "id": "relatedContent",
+      "name": "Related Content",
+      "type": "Array",
+      "items": {
+        "type": "Link",
+        "linkType": "Entry",
+        "validations": [
+          {
+            "linkContentType": ["educationalContent"]
+          }
+        ]
+      },
+      "required": false
+    }
+  ]
+}

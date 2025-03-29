@@ -1,0 +1,57 @@
+{
+  "name": "Supplier",
+  "description": "Substrate and equipment suppliers",
+  "displayField": "name",
+  "fields": [
+    {
+      "id": "name",
+      "name": "Name",
+      "type": "Symbol",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "description",
+      "name": "Description",
+      "type": "Symbol",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "url",
+      "name": "Website URL",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "featured",
+      "name": "Featured",
+      "type": "Boolean",
+      "required": true
+    },
+    {
+      "id": "referralCode",
+      "name": "Referral Code",
+      "type": "Symbol",
+      "required": false
+    },
+    {
+      "id": "type",
+      "name": "Supplier Type",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "in": ["substrate", "spores", "accessories"]
+        }
+      ]
+    },
+    {
+      "id": "logo",
+      "name": "Logo",
+      "type": "Link",
+      "linkType": "Asset",
+      "required": false
+    }
+  ]
+}

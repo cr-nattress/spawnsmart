@@ -1,0 +1,13 @@
+{
+  "fields": {
+    "fact": {
+      "en-US": "Mushrooms are more closely related to humans than to plants, belonging to their own kingdom called Fungi."
+    },
+    "category": {
+      "en-US": "biology"
+    },
+    "source": {
+      "en-US": "Mycological Society of America"
+    }
+  }
+}

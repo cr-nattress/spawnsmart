@@ -1,0 +1,33 @@
+{
+  "fields": {
+    "question": {
+      "en-US": "What is spawn?"
+    },
+    "answer": {
+      "en-US": {
+        "nodeType": "document",
+        "data": {},
+        "content": [
+          {
+            "nodeType": "paragraph",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "text",
+                "value": "Spawn is a substrate, such as grain or sawdust, that has been fully colonized by mushroom mycelium. It serves as the \"seed\" to inoculate bulk substrate.",
+                "marks": [],
+                "data": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "category": {
+      "en-US": "cultivation"
+    },
+    "order": {
+      "en-US": 1
+    }
+  }
+}

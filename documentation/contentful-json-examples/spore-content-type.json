@@ -1,0 +1,117 @@
+{
+  "name": "Spore",
+  "description": "Mushroom spore varieties",
+  "displayField": "name",
+  "fields": [
+    {
+      "id": "name",
+      "name": "Name",
+      "type": "Symbol",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "mushroomType",
+      "name": "Mushroom Type",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "in": ["Psilocybe cubensis", "Psilocybe cyanescens", "Gourmet", "Medicinal"]
+        }
+      ]
+    },
+    {
+      "id": "subtype",
+      "name": "Subtype",
+      "type": "Symbol",
+      "required": true
+    },
+    {
+      "id": "description",
+      "name": "Description",
+      "type": "Text",
+      "localized": true,
+      "required": true
+    },
+    {
+      "id": "growingConditions",
+      "name": "Growing Conditions",
+      "type": "Text",
+      "localized": true,
+      "required": false
+    },
+    {
+      "id": "sizeAppearance",
+      "name": "Size & Appearance",
+      "type": "Text",
+      "localized": true,
+      "required": false
+    },
+    {
+      "id": "strength",
+      "name": "Strength",
+      "type": "Symbol",
+      "required": false
+    },
+    {
+      "id": "moodEffects",
+      "name": "Mood Effects",
+      "type": "Text",
+      "required": false
+    },
+    {
+      "id": "culinaryUses",
+      "name": "Culinary Uses",
+      "type": "Text",
+      "localized": true,
+      "required": false
+    },
+    {
+      "id": "medicinalBenefits",
+      "name": "Medicinal Benefits",
+      "type": "Text",
+      "localized": true,
+      "required": false
+    },
+    {
+      "id": "difficulty",
+      "name": "Difficulty",
+      "type": "Symbol",
+      "required": true,
+      "validations": [
+        {
+          "in": ["Beginner", "Intermediate", "Advanced"]
+        }
+      ]
+    },
+    {
+      "id": "colonizationTime",
+      "name": "Colonization Time",
+      "type": "Symbol",
+      "required": false
+    },
+    {
+      "id": "image",
+      "name": "Image",
+      "type": "Link",
+      "linkType": "Asset",
+      "required": false
+    },
+    {
+      "id": "suppliers",
+      "name": "Suppliers",
+      "type": "Array",
+      "items": {
+        "type": "Link",
+        "linkType": "Entry",
+        "validations": [
+          {
+            "linkContentType": ["supplier"]
+          }
+        ]
+      },
+      "required": false
+    }
+  ]
+}

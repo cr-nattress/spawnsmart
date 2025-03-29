@@ -1,0 +1,19 @@
+{
+  "fields": {
+    "componentId": {
+      "en-US": "header-title"
+    },
+    "section": {
+      "en-US": "header"
+    },
+    "key": {
+      "en-US": "title"
+    },
+    "value": {
+      "en-US": "SpawnSmart"
+    },
+    "description": {
+      "en-US": "Main application title displayed in the header"
+    }
+  }
+}
