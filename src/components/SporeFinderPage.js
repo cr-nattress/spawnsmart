@@ -13,6 +13,7 @@ const SporeFinderPage = () => {
   const [sporeData, setSporeData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [supplierNames, setSupplierNames] = useState({});
   
   // Load spore data from ContentService
   useEffect(() => {
@@ -68,6 +69,42 @@ const SporeFinderPage = () => {
     
     loadSporeData();
   }, []);
+  
+  // Get supplier names for all IDs
+  useEffect(() => {
+    const loadSupplierNames = async () => {
+      if (sporeData.length > 0) {
+        const allSupplierIds = [];
+        sporeData.forEach(spore => {
+          if (spore.suppliers && Array.isArray(spore.suppliers)) {
+            spore.suppliers.forEach(id => {
+              if (!allSupplierIds.includes(id)) {
+                allSupplierIds.push(id);
+              }
+            });
+          }
+        });
+        
+        if (allSupplierIds.length > 0) {
+          const names = await ContentService.getSupplierNamesByIds(allSupplierIds);
+          
+          // Create a mapping of ID to name
+          const supplierMapping = {};
+          allSupplierIds.forEach((id, index) => {
+            supplierMapping[id] = names[index];
+          });
+          
+          setSupplierNames(supplierMapping);
+          LoggingService.debug('SporeFinderPage: Supplier names loaded', { 
+            count: Object.keys(supplierMapping).length,
+            sample: Object.entries(supplierMapping).slice(0, 3)
+          });
+        }
+      }
+    };
+    
+    loadSupplierNames();
+  }, [sporeData]);
   
   // Filter spores based on search term and filter type
   const filteredSpores = sporeData.filter(spore => {
@@ -261,12 +298,12 @@ const SporeFinderPage = () => {
               <div>
                 <strong className="text-sm text-gray-700 block mb-2">Available From:</strong>
                 <div className="flex flex-wrap gap-2">
-                  {spore.suppliers.map((supplier, index) => (
+                  {spore.suppliers && spore.suppliers.map((supplierId, index) => (
                     <span 
                       key={index} 
                       className="inline-block px-2 py-1 text-xs rounded-full bg-green-100 text-green-800"
                     >
-                      {supplier}
+                      {supplierNames[supplierId] || supplierId}
                     </span>
                   ))}
                 </div>

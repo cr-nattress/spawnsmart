@@ -885,6 +885,26 @@ class ContentService {
     await this.ensureInitialized();
     return this.sporeData.find(spore => spore.id === id) || null;
   }
+
+  /**
+   * Get supplier names by IDs
+   * 
+   * @param {Array} supplierIds Array of supplier IDs
+   * @returns {Array} Array of supplier names
+   */
+  async getSupplierNamesByIds(supplierIds) {
+    if (!supplierIds || !Array.isArray(supplierIds) || supplierIds.length === 0) {
+      return [];
+    }
+    
+    await this.ensureInitialized();
+    
+    // Map supplier IDs to names
+    return supplierIds.map(id => {
+      const supplier = this.substrateSuppliers.find(s => s.id === id || s.supplierId === id);
+      return supplier ? supplier.name : id; // Return the ID as fallback if supplier not found
+    });
+  }
 }
 
 // Create a singleton instance
