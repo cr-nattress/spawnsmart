@@ -7,9 +7,9 @@ import React from 'react';
 const BackgroundContainer = ({ children }) => {
     return (
         <div className="bg-container relative w-full">
-            {/* Fixed background div that covers the entire viewport */}
+            {/* Fixed background div that covers the entire viewport - hidden on mobile */}
             <div 
-                className="fixed inset-0 z-0" 
+                className="fixed inset-0 z-0 hidden md:block" 
                 style={{
                     backgroundImage: `url(${require('../assets/images/backgrounds/background.png')})`,
                     backgroundSize: 'cover',
